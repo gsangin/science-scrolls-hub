@@ -71,28 +71,34 @@ const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
         )}
       </div>
 
-      {previewOpen && (
-        <div className="border-t border-border animate-in slide-in-from-top-2 duration-200">
-          <div className="flex items-center justify-between px-4 py-2 bg-muted/40">
-            <span className="text-sm text-muted-foreground font-medium">Preview</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-primary gap-1.5"
-              onClick={() => window.open(viewerUrl, "_blank")}
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-              Full Screen
-            </Button>
-          </div>
+      <div
+        className="border-t border-border overflow-hidden transition-all duration-300 ease-in-out"
+        style={{
+          maxHeight: previewOpen ? "600px" : "0px",
+          opacity: previewOpen ? 1 : 0,
+        }}
+      >
+        <div className="flex items-center justify-between px-4 py-2 bg-muted/40">
+          <span className="text-sm text-muted-foreground font-medium">Preview</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-primary gap-1.5"
+            onClick={() => window.open(viewerUrl, "_blank")}
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+            Full Screen
+          </Button>
+        </div>
+        {previewOpen && (
           <iframe
             src={publicUrl}
             title={resource.title}
             className="w-full border-0"
             style={{ height: "500px" }}
           />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
