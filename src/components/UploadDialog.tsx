@@ -30,7 +30,7 @@ interface UploadDialogProps {
 const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
-  const [classLevel, setClassLevel] = useState<"11" | "12">("11");
+  const [classLevel, setClassLevel] = useState("11");
   const [type, setType] = useState<"notes" | "textbook">("notes");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
