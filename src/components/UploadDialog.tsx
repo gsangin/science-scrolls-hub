@@ -135,13 +135,14 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
             </div>
             <div className="space-y-2">
               <Label>Class</Label>
-              <Select value={classLevel} onValueChange={(v) => setClassLevel(v as "11" | "12")}>
+              <Select value={classLevel} onValueChange={setClassLevel}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="11">Class 11</SelectItem>
-                  <SelectItem value="12">Class 12</SelectItem>
+                  {classLevelOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

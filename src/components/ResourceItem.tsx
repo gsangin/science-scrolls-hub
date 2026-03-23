@@ -42,7 +42,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
           <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
             <span className="capitalize">{resource.type}</span>
             <span>•</span>
-            <span>Class {resource.class_level}</span>
+            <span>{classLevelOptions.find(o => o.value === resource.class_level)?.label || `Class ${resource.class_level}`}</span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />

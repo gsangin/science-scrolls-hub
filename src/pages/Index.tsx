@@ -216,18 +216,7 @@ const Index = () => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 px-6 py-8 mt-10">
-        <div className="mx-auto max-w-5xl text-center">
-          <h3 className="font-heading text-lg font-semibold text-foreground">About the Author</h3>
-          <p className="mt-2 text-muted-foreground">
-            Created by <span className="font-semibold text-primary">Sangin Ghimire</span>
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground/70">
-            Dedicated to making quality science education accessible for all students.
-          </p>
-        </div>
-      </footer>
+      <AuthorFooter />
 
       {user && (
         <UploadDialog

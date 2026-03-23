@@ -23,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<Login />} />
             <Route path="/view" element={<PdfViewer />} />
+            <Route path="/admin-settings" element={<AdminSettings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
