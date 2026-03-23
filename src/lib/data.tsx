@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Upload, Atom, FlaskConical, Dna, Calculator } from "lucide-react";
+import { Atom, FlaskConical, Dna, Calculator } from "lucide-react";
 
 export interface Subject {
   id: string;
@@ -19,8 +19,11 @@ export interface Resource {
   id: string;
   title: string;
   subject: string;
-  classLevel: "11" | "12";
-  type: "notes" | "textbook";
-  fileName: string;
-  uploadedAt: string;
+  class_level: string;
+  type: string;
+  file_name: string;
+  file_path: string;
+  file_size: number | null;
+  created_at: string;
+  user_id: string;
 }
