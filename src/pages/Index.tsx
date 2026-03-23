@@ -1,15 +1,17 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Upload, BookOpen, Search, GraduationCap, LogOut } from "lucide-react";
+import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SubjectCard from "@/components/SubjectCard";
 import ResourceItem from "@/components/ResourceItem";
 import UploadDialog from "@/components/UploadDialog";
-import { subjects, type Resource } from "@/lib/data";
+import AuthorFooter from "@/components/AuthorFooter";
+import { subjects, classLevelOptions, type Resource } from "@/lib/data";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [resources, setResources] = useState<Resource[]>([]);
