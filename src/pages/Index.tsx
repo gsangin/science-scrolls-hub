@@ -19,7 +19,7 @@ const Index = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  
 
   const fetchResources = useCallback(async () => {
     const { data, error } = await supabase
