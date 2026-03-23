@@ -158,11 +158,12 @@ const Index = () => {
                 : "All Resources"}
             </h2>
             <div className="flex items-center gap-3">
-              <Tabs value={classFilter} onValueChange={(v) => setClassFilter(v as any)}>
+              <Tabs value={classFilter} onValueChange={setClassFilter}>
                 <TabsList>
                   <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="11">Class 11</TabsTrigger>
-                  <TabsTrigger value="12">Class 12</TabsTrigger>
+                  {classLevelOptions.map((opt) => (
+                    <TabsTrigger key={opt.value} value={opt.value}>{opt.label}</TabsTrigger>
+                  ))}
                 </TabsList>
               </Tabs>
             </div>
