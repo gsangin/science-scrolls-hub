@@ -29,7 +29,7 @@ const PdfViewer = () => {
       </header>
       <div className="flex-1">
         <iframe
-          src={url}
+          src={`${url}#toolbar=0`}
           title={title}
           className="w-full h-full border-0"
           style={{ minHeight: "calc(100vh - 57px)" }}
