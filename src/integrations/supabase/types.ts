@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      author_settings: {
+        Row: {
+          description: string | null
+          id: string
+          name: string
+          photo_url: string | null
+          show_photo: boolean
+          updated_at: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          name?: string
+          photo_url?: string | null
+          show_photo?: boolean
+          updated_at?: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          name?: string
+          photo_url?: string | null
+          show_photo?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       resources: {
         Row: {
           class_level: string

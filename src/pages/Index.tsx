@@ -1,24 +1,27 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Upload, BookOpen, Search, GraduationCap, LogOut } from "lucide-react";
+import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SubjectCard from "@/components/SubjectCard";
 import ResourceItem from "@/components/ResourceItem";
 import UploadDialog from "@/components/UploadDialog";
-import { subjects, type Resource } from "@/lib/data";
+import AuthorFooter from "@/components/AuthorFooter";
+import { subjects, classLevelOptions, type Resource } from "@/lib/data";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [classFilter, setClassFilter] = useState<"all" | "11" | "12">("all");
+  const [classFilter, setClassFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
 
   const fetchResources = useCallback(async () => {
@@ -86,6 +89,15 @@ const Index = () => {
               size="sm"
               variant="ghost"
               className="text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => navigate("/admin-settings")}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-primary-foreground hover:bg-primary-foreground/10"
               onClick={signOut}
             >
               <LogOut className="w-4 h-4 mr-2" />
@@ -145,11 +157,12 @@ const Index = () => {
                 : "All Resources"}
             </h2>
             <div className="flex items-center gap-3">
-              <Tabs value={classFilter} onValueChange={(v) => setClassFilter(v as any)}>
+              <Tabs value={classFilter} onValueChange={setClassFilter}>
                 <TabsList>
                   <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="11">Class 11</TabsTrigger>
-                  <TabsTrigger value="12">Class 12</TabsTrigger>
+                  {classLevelOptions.map((opt) => (
+                    <TabsTrigger key={opt.value} value={opt.value}>{opt.label}</TabsTrigger>
+                  ))}
                 </TabsList>
               </Tabs>
             </div>
@@ -202,18 +215,7 @@ const Index = () => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 px-6 py-8 mt-10">
-        <div className="mx-auto max-w-5xl text-center">
-          <h3 className="font-heading text-lg font-semibold text-foreground">About the Author</h3>
-          <p className="mt-2 text-muted-foreground">
-            Created by <span className="font-semibold text-primary">Sangin Ghimire</span>
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground/70">
-            Dedicated to making quality science education accessible for all students.
-          </p>
-        </div>
-      </footer>
+      <AuthorFooter />
 
       {user && (
         <UploadDialog

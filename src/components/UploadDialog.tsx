@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { subjects } from "@/lib/data";
+import { subjects, classLevelOptions } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +30,7 @@ interface UploadDialogProps {
 const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
-  const [classLevel, setClassLevel] = useState<"11" | "12">("11");
+  const [classLevel, setClassLevel] = useState("11");
   const [type, setType] = useState<"notes" | "textbook">("notes");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -135,13 +135,14 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
             </div>
             <div className="space-y-2">
               <Label>Class</Label>
-              <Select value={classLevel} onValueChange={(v) => setClassLevel(v as "11" | "12")}>
+              <Select value={classLevel} onValueChange={setClassLevel}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="11">Class 11</SelectItem>
-                  <SelectItem value="12">Class 12</SelectItem>
+                  {classLevelOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
