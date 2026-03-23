@@ -8,6 +8,13 @@ export interface Subject {
   resourceCount: number;
 }
 
+export const classLevelOptions = [
+  { value: "11", label: "Class 11" },
+  { value: "12", label: "Class 12" },
+  { value: "diploma-1", label: "Diploma 1st Sem" },
+  { value: "diploma-2", label: "Diploma 2nd Sem" },
+];
+
 export const subjects: Subject[] = [
   { id: "physics", name: "Physics", icon: <Atom className="w-6 h-6" />, color: "from-blue-500/20 to-blue-600/10", resourceCount: 0 },
   { id: "chemistry", name: "Chemistry", icon: <FlaskConical className="w-6 h-6" />, color: "from-emerald-500/20 to-emerald-600/10", resourceCount: 0 },
