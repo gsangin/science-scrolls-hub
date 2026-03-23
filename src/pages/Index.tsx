@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Upload, BookOpen, Search, GraduationCap, LogIn, LogOut } from "lucide-react";
+import { Upload, BookOpen, Search, GraduationCap, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
