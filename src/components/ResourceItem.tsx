@@ -10,11 +10,12 @@ interface ResourceItemProps {
 }
 
 const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
+  const publicUrl = supabase.storage
+    .from("study-materials")
+    .getPublicUrl(resource.file_path).data.publicUrl;
+
   const handleDownload = () => {
-    const { data } = supabase.storage
-      .from("study-materials")
-      .getPublicUrl(resource.file_path);
-    window.open(data.publicUrl, "_blank");
+    window.open(publicUrl, "_blank");
   };
 
   return (
@@ -25,7 +26,9 @@ const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
         {resource.type === "notes" ? <FileText className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="font-heading font-semibold text-card-foreground truncate">{resource.title}</h4>
+        <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="font-heading font-semibold text-card-foreground truncate block hover:text-primary hover:underline transition-colors">
+          {resource.title}
+        </a>
         <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
           <span className="capitalize">{resource.type}</span>
           <span>•</span>
