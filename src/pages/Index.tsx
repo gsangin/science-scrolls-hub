@@ -16,11 +16,12 @@ import { useNavigate } from "react-router-dom";
 const Index = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [classFilter, setClassFilter] = useState<"all" | "11" | "12">("all");
+  const [classFilter, setClassFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
 
   const fetchResources = useCallback(async () => {
