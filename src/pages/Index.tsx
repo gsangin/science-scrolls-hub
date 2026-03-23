@@ -112,10 +112,10 @@ const Index = () => {
             Class 11 & 12 Science
           </div>
           <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl">
-            StudyVault
+            Science Scrolls
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-primary-foreground/80">
-            Your personal library for notes and textbooks. Organize, upload, and access study materials across all science subjects.
+            Your Science Companion
           </p>
           {user && (
             <Button
