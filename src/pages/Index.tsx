@@ -89,10 +89,20 @@ const Index = () => {
               size="sm"
               variant="ghost"
               className="text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => navigate("/admin-settings")}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-primary-foreground hover:bg-primary-foreground/10"
               onClick={signOut}
             >
               <LogOut className="w-4 h-4 mr-2" />
               Logout
+            </Button>
             </Button>
           </div>
         )}
