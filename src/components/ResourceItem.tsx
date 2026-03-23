@@ -37,16 +37,16 @@ const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-primary"
-          onClick={handleDownload}
-        >
-          <Download className="w-4 h-4" />
-        </Button>
-        {isAdmin && (
+      {isAdmin && (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-primary"
+            onClick={handleDownload}
+          >
+            <Download className="w-4 h-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -55,8 +55,8 @@ const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
           >
             <Trash2 className="w-4 h-4" />
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
