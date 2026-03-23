@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { Upload, BookOpen, Search, GraduationCap, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { LogIn as _unused } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
