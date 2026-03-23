@@ -103,7 +103,6 @@ const Index = () => {
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </Button>
-            </Button>
           </div>
         )}
         <div className="relative mx-auto max-w-4xl text-center">
