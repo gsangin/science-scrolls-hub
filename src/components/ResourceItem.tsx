@@ -14,6 +14,8 @@ const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
     .from("study-materials")
     .getPublicUrl(resource.file_path).data.publicUrl;
 
+  const viewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}`;
+
   const handleDownload = () => {
     window.open(publicUrl, "_blank");
   };
@@ -26,7 +28,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
         {resource.type === "notes" ? <FileText className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
       </div>
       <div className="flex-1 min-w-0">
-        <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="font-heading font-semibold text-card-foreground truncate block hover:text-primary hover:underline transition-colors">
+        <a href={viewerUrl} className="font-heading font-semibold text-card-foreground truncate block hover:text-primary hover:underline transition-colors">
           {resource.title}
         </a>
         <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
