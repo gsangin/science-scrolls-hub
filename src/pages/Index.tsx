@@ -73,39 +73,27 @@ const Index = () => {
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent/40" />
           <div className="absolute -bottom-10 -left-10 h-60 w-60 rounded-full bg-accent/20" />
         </div>
-        <div className="absolute right-6 top-6">
-          {user ? (
-            <div className="flex items-center gap-3">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => setUploadOpen(true)}
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Upload
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-primary-foreground hover:bg-primary-foreground/10"
-                onClick={signOut}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-            </div>
-          ) : (
+        {user && (
+          <div className="absolute right-6 top-6 flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setUploadOpen(true)}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload
+            </Button>
             <Button
               size="sm"
               variant="ghost"
               className="text-primary-foreground hover:bg-primary-foreground/10"
-              onClick={() => navigate("/login")}
+              onClick={signOut}
             >
-              <LogIn className="w-4 h-4 mr-2" />
-              Admin
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
-          )}
-        </div>
+          </div>
+        )}
         <div className="relative mx-auto max-w-4xl text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-1.5 text-sm">
             <GraduationCap className="w-4 h-4" />
