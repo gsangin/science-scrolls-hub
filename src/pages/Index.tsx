@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
-import { Upload, BookOpen, Search, GraduationCap } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { Upload, BookOpen, Search, GraduationCap, LogIn, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,7 +8,9 @@ import SubjectCard from "@/components/SubjectCard";
 import ResourceItem from "@/components/ResourceItem";
 import UploadDialog from "@/components/UploadDialog";
 import { subjects, type Resource } from "@/lib/data";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -15,7 +18,21 @@ const Index = () => {
   const [classFilter, setClassFilter] = useState<"all" | "11" | "12">("all");
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const fetchResources = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("resources")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (!error && data) setResources(data as Resource[]);
+  }, []);
+
+  useEffect(() => {
+    fetchResources();
+  }, [fetchResources]);
 
   const subjectsWithCounts = useMemo(() =>
     subjects.map(s => ({
@@ -28,25 +45,24 @@ const Index = () => {
   const filteredResources = useMemo(() => {
     return resources.filter(r => {
       if (selectedSubject && r.subject !== selectedSubject) return false;
-      if (classFilter !== "all" && r.classLevel !== classFilter) return false;
+      if (classFilter !== "all" && r.class_level !== classFilter) return false;
       if (search && !r.title.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
   }, [resources, selectedSubject, classFilter, search]);
 
-  const handleUpload = (data: Omit<Resource, "id" | "uploadedAt">) => {
-    const newResource: Resource = {
-      ...data,
-      id: crypto.randomUUID(),
-      uploadedAt: new Date().toISOString(),
-    };
-    setResources(prev => [newResource, ...prev]);
-    toast({ title: "Resource uploaded!", description: `"${data.title}" has been added.` });
-  };
+  const handleDelete = async (id: string) => {
+    const resource = resources.find(r => r.id === id);
+    if (!resource) return;
 
-  const handleDelete = (id: string) => {
-    setResources(prev => prev.filter(r => r.id !== id));
-    toast({ title: "Resource deleted", variant: "destructive" });
+    // Delete file from storage
+    await supabase.storage.from("study-materials").remove([resource.file_path]);
+    // Delete record from DB
+    const { error } = await supabase.from("resources").delete().eq("id", id);
+    if (!error) {
+      setResources(prev => prev.filter(r => r.id !== id));
+      toast({ title: "Resource deleted", variant: "destructive" });
+    }
   };
 
   return (
@@ -56,6 +72,39 @@ const Index = () => {
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent/40" />
           <div className="absolute -bottom-10 -left-10 h-60 w-60 rounded-full bg-accent/20" />
+        </div>
+        <div className="absolute right-6 top-6">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setUploadOpen(true)}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Upload
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-primary-foreground hover:bg-primary-foreground/10"
+                onClick={signOut}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => navigate("/login")}
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Admin
+            </Button>
+          )}
         </div>
         <div className="relative mx-auto max-w-4xl text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-1.5 text-sm">
@@ -68,14 +117,16 @@ const Index = () => {
           <p className="mx-auto mt-4 max-w-xl text-lg text-primary-foreground/80">
             Your personal library for notes and textbooks. Organize, upload, and access study materials across all science subjects.
           </p>
-          <Button
-            size="lg"
-            onClick={() => setUploadOpen(true)}
-            className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-lg"
-          >
-            <Upload className="w-5 h-5 mr-2" />
-            Upload Resource
-          </Button>
+          {user && (
+            <Button
+              size="lg"
+              onClick={() => setUploadOpen(true)}
+              className="mt-8 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-lg"
+            >
+              <Upload className="w-5 h-5 mr-2" />
+              Upload Resource
+            </Button>
+          )}
         </div>
       </header>
 
@@ -135,22 +186,27 @@ const Index = () => {
                   No resources yet
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground/70">
-                  Upload your first notes or textbook to get started
+                  {user
+                    ? "Upload your first notes or textbook to get started"
+                    : "Check back soon for study materials"}
                 </p>
-                <Button
-                  variant="outline"
-                  className="mt-4"
-                  onClick={() => setUploadOpen(true)}
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload
-                </Button>
+                {user && (
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => setUploadOpen(true)}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload
+                  </Button>
+                )}
               </div>
             ) : (
               filteredResources.map(resource => (
                 <ResourceItem
                   key={resource.id}
                   resource={resource}
+                  isAdmin={!!user}
                   onDelete={handleDelete}
                 />
               ))
@@ -159,11 +215,13 @@ const Index = () => {
         </section>
       </main>
 
-      <UploadDialog
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onUpload={handleUpload}
-      />
+      {user && (
+        <UploadDialog
+          open={uploadOpen}
+          onClose={() => setUploadOpen(false)}
+          onUploaded={fetchResources}
+        />
+      )}
     </div>
   );
 };
