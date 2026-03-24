@@ -19,3 +19,26 @@
 [data-radix-popper-content-wrapper] {
   max-width: 95vw !important;
 }
+/* Fix for small previews in subject-specific portions */
+@layer utilities {
+  .mobile-preview-fix {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+  }
+}
+
+@media (max-width: 640px) {
+  /* This overrides the 2rem padding from tailwind.config.ts */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+  }
+  
+  /* Forces images to use more screen width */
+  img {
+    max-width: none;
+    width: 100%;
+  }
+}
