@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SubjectCard from "@/components/SubjectCard";
 import ResourceItem from "@/components/ResourceItem";
+import PortionAccordion from "@/components/PortionAccordion";
 import UploadDialog from "@/components/UploadDialog";
 import AuthorFooter from "@/components/AuthorFooter";
 import { subjects, classLevelOptions, type Resource } from "@/lib/data";
@@ -201,6 +202,12 @@ const Index = () => {
                   </Button>
                 )}
               </div>
+            ) : selectedSubject === "physics" && (classFilter === "11" || classFilter === "12") ? (
+              <PortionAccordion
+                resources={filteredResources}
+                isAdmin={!!user}
+                onDelete={handleDelete}
+              />
             ) : (
               filteredResources.map(resource => (
                 <ResourceItem
