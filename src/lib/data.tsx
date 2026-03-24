@@ -15,6 +15,14 @@ export const classLevelOptions = [
   { value: "diploma-2", label: "Diploma 2nd Sem" },
 ];
 
+export const physicsPortions = [
+  { value: "mechanics", label: "Mechanics" },
+  { value: "heat-thermodynamics", label: "Heat and Thermodynamics" },
+  { value: "wave-optics", label: "Wave and Optics" },
+  { value: "electricity-magnetism", label: "Electricity and Magnetism" },
+  { value: "modern-physics", label: "Modern Physics" },
+];
+
 export const subjects: Subject[] = [
   { id: "physics", name: "Physics", icon: <Atom className="w-6 h-6" />, color: "from-blue-500/20 to-blue-600/10", resourceCount: 0 },
   { id: "chemistry", name: "Chemistry", icon: <FlaskConical className="w-6 h-6" />, color: "from-emerald-500/20 to-emerald-600/10", resourceCount: 0 },
