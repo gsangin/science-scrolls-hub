@@ -39,10 +39,16 @@ const ResourceItem = ({ resource, isAdmin, onDelete }: ResourceItemProps) => {
           >
             {resource.title}
           </button>
-          <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
             <span className="capitalize">{resource.type}</span>
             <span>•</span>
             <span>{classLevelOptions.find(o => o.value === resource.class_level)?.label || `Class ${resource.class_level}`}</span>
+            {resource.portion && (
+              <>
+                <span>•</span>
+                <span>{physicsPortions.find(p => p.value === resource.portion)?.label || resource.portion}</span>
+              </>
+            )}
             <span>•</span>
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
