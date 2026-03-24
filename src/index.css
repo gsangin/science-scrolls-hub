@@ -1,44 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer base {
   :root {
-    --vh: 100dvh;
+    --background: 40 20% 97%;
+    --foreground: 200 25% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 25% 10%;
+    --primary: 185 60% 22%;
+    --primary-foreground: 40 20% 97%;
+    --secondary: 40 30% 92%;
+    --secondary-foreground: 200 25% 10%;
+    --muted: 40 15% 94%;
+    --muted-foreground: 200 10% 45%;
+    --accent: 32 80% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 200 15% 90%;
+    --input: 200 15% 90%;
+    --ring: 185 60% 22%;
+    --radius: 0.75rem;
   }
 
-  body {
-    /* Prevents "rubber-banding" scroll issues on iOS */
-    overscroll-behavior-y: none; 
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Utility for modern mobile displays with home bars */
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
+  .dark {
+    --background: 200 25% 8%;
+    --foreground: 40 20% 95%;
   }
 }
 
-/* Optimize Shadcn Sheets/Dialogs for Mobile */
-[data-radix-popper-content-wrapper] {
-  max-width: 95vw !important;
-}
-/* Fix for small previews in subject-specific portions */
 @layer utilities {
-  .mobile-preview-fix {
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
+  /* This ensures your note previews are large on all devices */
+  .note-preview-container {
+    width: 100%;
+    aspect-ratio: 3 / 4; /* A4 paper ratio */
+    overflow: hidden;
+    background: hsl(var(--muted));
+  }
+
+  .note-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    transition: transform 0.3s ease;
   }
 }
 
-@media (max-width: 640px) {
-  /* This overrides the 2rem padding from tailwind.config.ts */
+/* Fix for standard desktop monitors wasting space */
+@media (min-width: 1280px) {
   .container {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    max-width: 100% !important;
-  }
-  
-  /* Forces images to use more screen width */
-  img {
-    max-width: none;
-    width: 100%;
+    max-width: 90vw !important;
   }
 }
