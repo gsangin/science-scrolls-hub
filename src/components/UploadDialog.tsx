@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { subjects, classLevelOptions } from "@/lib/data";
+import { subjects, classLevelOptions, physicsPortions } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -32,10 +32,13 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
   const [subject, setSubject] = useState("");
   const [classLevel, setClassLevel] = useState("11");
   const [type, setType] = useState<"notes" | "textbook">("notes");
+  const [portion, setPortion] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const showPortions = subject === "physics" && (classLevel === "11" || classLevel === "12");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -51,7 +54,6 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
 
     setUploading(true);
     try {
-      // Upload file to storage
       const filePath = `${user.id}/${Date.now()}_${file.name}`;
       const { error: storageError } = await supabase.storage
         .from("study-materials")
@@ -59,7 +61,6 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
 
       if (storageError) throw storageError;
 
-      // Insert resource record
       const { error: dbError } = await supabase.from("resources").insert({
         user_id: user.id,
         title,
@@ -69,6 +70,7 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
         file_name: file.name,
         file_path: filePath,
         file_size: file.size,
+        portion: showPortions && portion ? portion : null,
       });
 
       if (dbError) throw dbError;
@@ -78,6 +80,7 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
       setSubject("");
       setClassLevel("11");
       setType("notes");
+      setPortion("");
       setFile(null);
       onUploaded();
       onClose();
@@ -122,7 +125,7 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Subject</Label>
-              <Select value={subject} onValueChange={setSubject}>
+              <Select value={subject} onValueChange={(v) => { setSubject(v); setPortion(""); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -135,7 +138,7 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
             </div>
             <div className="space-y-2">
               <Label>Class</Label>
-              <Select value={classLevel} onValueChange={setClassLevel}>
+              <Select value={classLevel} onValueChange={(v) => { setClassLevel(v); setPortion(""); }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -147,6 +150,22 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
               </Select>
             </div>
           </div>
+
+          {showPortions && (
+            <div className="space-y-2">
+              <Label>Portion (optional)</Label>
+              <Select value={portion} onValueChange={setPortion}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select portion" />
+                </SelectTrigger>
+                <SelectContent>
+                  {physicsPortions.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Type</Label>
