@@ -6,19 +6,17 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-do
 import { lazy, Suspense, useMemo } from "react";
 import { Home, Atom, Beaker, BookOpen, Calculator } from "lucide-react";
 
-// 1. High-Performance Query Configuration
+// Optimized Query Client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // Cache notes for 5 minutes
-      gcTime: 1000 * 60 * 30,    // Keep in memory for 30 minutes
-      refetchOnWindowFocus: false, // Prevents battery drain on mobile
-      retry: 1,
+      staleTime: 1000 * 60 * 10, // 10 minutes cache
+      refetchOnWindowFocus: false,
     },
   },
 });
 
-// 2. Asset-Light Lazy Loading
+// Lazy Pages (Faster mobile loading)
 const Index = lazy(() => import("./pages/Index"));
 const Physics = lazy(() => import("./pages/Physics"));
 const Chemistry = lazy(() => import("./pages/Chemistry"));
@@ -26,13 +24,9 @@ const Biology = lazy(() => import("./pages/Biology"));
 const Maths = lazy(() => import("./pages/Maths"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-/**
- * Mobile Bottom Navigation
- * Optimized for thumb-reach and "Safe Area" insets on iOS/Android
- */
+// Mobile Bottom Navigation Bar
 const BottomNav = () => {
   const location = useLocation();
-  
   const navItems = useMemo(() => [
     { path: "/", icon: <Home size={22} />, label: "Home" },
     { path: "/physics", icon: <Atom size={22} />, label: "Physics" },
@@ -42,21 +36,21 @@ const BottomNav = () => {
   ], []);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-border/40 bg-background/80 pb-safe backdrop-blur-lg md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-20 items-center justify-around border-t border-border/50 bg-background/80 pb-6 backdrop-blur-xl md:hidden">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         return (
           <Link
             key={item.path}
             to={item.path}
-            className={`flex flex-col items-center gap-1 transition-all duration-200 active:scale-90 ${
-              isActive ? "text-primary font-bold" : "text-muted-foreground"
+            className={`flex flex-col items-center gap-1.5 transition-all active:scale-90 ${
+              isActive ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            <div className={isActive ? "scale-110 transition-transform" : ""}>
+            <div className={`${isActive ? "scale-110 shadow-lg shadow-primary/10" : ""}`}>
               {item.icon}
             </div>
-            <span className="text-[10px] tracking-tight">{item.label}</span>
+            <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
           </Link>
         );
       })}
@@ -64,45 +58,34 @@ const BottomNav = () => {
   );
 };
 
-// 3. Ultra-lightweight Loader for Mobile
-const PageLoader = () => (
-  <div className="flex h-[100dvh] w-full flex-col items-center justify-center bg-background">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-    <p className="mt-4 text-xs font-medium text-muted-foreground animate-pulse">
-      Opening the Scrolls...
-    </p>
-  </div>
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner position="top-center" />
+      <BrowserRouter>
+        <div className="flex min-h-[100dvh] flex-col bg-background selection:bg-primary/10">
+          <main className="flex-1 pb-24"> {/* Extra padding for the bottom nav */}
+            <Suspense fallback={
+              <div className="flex h-screen items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            }>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/physics" element={<Physics />} />
+                <Route path="/chemistry" element={<Chemistry />} />
+                <Route path="/biology" element={<Biology />} />
+                <Route path="/maths" element={<Maths />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </main>
+          <BottomNav />
+        </div>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
 );
-
-const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner position="top-center" /> {/* Toasts are easier to see at top on mobile */}
-        <BrowserRouter>
-          <div className="relative flex min-h-[100dvh] flex-col bg-background antialiased selection:bg-primary/10">
-            
-            {/* Main Scroll Content Area */}
-            <main className="flex-1 pb-20 md:pb-0"> 
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/physics" element={<Physics />} />
-                  <Route path="/chemistry" element={<Chemistry />} />
-                  <Route path="/biology" element={<Biology />} />
-                  <Route path="/maths" element={<Maths />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </main>
-
-            <BottomNav />
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-};
 
 export default App;
