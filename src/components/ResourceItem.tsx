@@ -1,6 +1,6 @@
 import { FileText, BookOpen, Calendar, Trash2, Download, Maximize2 } from "lucide-react";
 import type { Resource } from "@/lib/data";
-import { classLevelOptions } from "@/lib/data";
+import { classLevelOptions, physicsPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
