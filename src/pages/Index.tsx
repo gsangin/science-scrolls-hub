@@ -202,6 +202,12 @@ const Index = () => {
                   </Button>
                 )}
               </div>
+            ) : selectedSubject === "physics" && (classFilter === "11" || classFilter === "12") ? (
+              <PortionAccordion
+                resources={filteredResources}
+                isAdmin={!!user}
+                onDelete={handleDelete}
+              />
             ) : (
               filteredResources.map(resource => (
                 <ResourceItem
