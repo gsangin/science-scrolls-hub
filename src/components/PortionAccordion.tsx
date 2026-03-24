@@ -68,6 +68,7 @@ const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAc
                       resource={resource}
                       isAdmin={isAdmin}
                       onDelete={onDelete}
+                      onUpdated={onUpdated}
                     />
                   ))
                 )}
