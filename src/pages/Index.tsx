@@ -215,6 +215,7 @@ const Index = () => {
                   resource={resource}
                   isAdmin={!!user}
                   onDelete={handleDelete}
+                  onUpdated={fetchResources}
                 />
               ))
             )}
