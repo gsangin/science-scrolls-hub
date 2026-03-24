@@ -7,9 +7,10 @@ interface PortionAccordionProps {
   resources: Resource[];
   isAdmin: boolean;
   onDelete: (id: string) => void;
+  onUpdated?: () => void;
 }
 
-const PortionAccordion = ({ resources, isAdmin, onDelete }: PortionAccordionProps) => {
+const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAccordionProps) => {
   const [openPortions, setOpenPortions] = useState<string[]>([]);
 
   const togglePortion = (portion: string) => {
@@ -67,6 +68,7 @@ const PortionAccordion = ({ resources, isAdmin, onDelete }: PortionAccordionProp
                       resource={resource}
                       isAdmin={isAdmin}
                       onDelete={onDelete}
+                      onUpdated={onUpdated}
                     />
                   ))
                 )}
@@ -84,6 +86,7 @@ const PortionAccordion = ({ resources, isAdmin, onDelete }: PortionAccordionProp
               resource={resource}
               isAdmin={isAdmin}
               onDelete={onDelete}
+              onUpdated={onUpdated}
             />
           ))}
         </div>

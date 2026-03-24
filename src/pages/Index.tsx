@@ -207,6 +207,7 @@ const Index = () => {
                 resources={filteredResources}
                 isAdmin={!!user}
                 onDelete={handleDelete}
+                onUpdated={fetchResources}
               />
             ) : (
               filteredResources.map(resource => (
@@ -215,6 +216,7 @@ const Index = () => {
                   resource={resource}
                   isAdmin={!!user}
                   onDelete={handleDelete}
+                  onUpdated={fetchResources}
                 />
               ))
             )}
