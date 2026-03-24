@@ -41,4 +41,5 @@ export interface Resource {
   file_size: number | null;
   created_at: string;
   user_id: string;
+  portion: string | null;
 }
