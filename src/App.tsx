@@ -1,30 +1,28 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Link, useLocation } from "react-router-dom";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/hooks/useAuth";
 import { lazy, Suspense, useMemo } from "react";
 import { Home, Atom, Beaker, BookOpen, Calculator } from "lucide-react";
 
-// Optimized Query Client
+// Lazy loading pages for better performance
+const Index = lazy(() => import("./pages/Index.tsx"));
+const Login = lazy(() => import("./pages/Login.tsx"));
+const PdfViewer = lazy(() => import("./pages/PdfViewer.tsx"));
+const AdminSettings = lazy(() => import("./pages/AdminSettings.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 10, // 10 minutes cache
+      staleTime: 1000 * 60 * 10,
       refetchOnWindowFocus: false,
     },
   },
 });
 
-// Lazy Pages (Faster mobile loading)
-const Index = lazy(() => import("./pages/Index"));
-const Physics = lazy(() => import("./pages/Physics"));
-const Chemistry = lazy(() => import("./pages/Chemistry"));
-const Biology = lazy(() => import("./pages/Biology"));
-const Maths = lazy(() => import("./pages/Maths"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-
-// Mobile Bottom Navigation Bar
 const BottomNav = () => {
   const location = useLocation();
   const navItems = useMemo(() => [
@@ -47,9 +45,7 @@ const BottomNav = () => {
               isActive ? "text-primary" : "text-muted-foreground"
             }`}
           >
-            <div className={`${isActive ? "scale-110 shadow-lg shadow-primary/10" : ""}`}>
-              {item.icon}
-            </div>
+            <div className={isActive ? "scale-110" : ""}>{item.icon}</div>
             <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
           </Link>
         );
@@ -61,29 +57,27 @@ const BottomNav = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner position="top-center" />
-      <BrowserRouter>
-        <div className="flex min-h-[100dvh] flex-col bg-background selection:bg-primary/10">
-          <main className="flex-1 pb-24"> {/* Extra padding for the bottom nav */}
-            <Suspense fallback={
-              <div className="flex h-screen items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              </div>
-            }>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/physics" element={<Physics />} />
-                <Route path="/chemistry" element={<Chemistry />} />
-                <Route path="/biology" element={<Biology />} />
-                <Route path="/maths" element={<Maths />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </main>
-          <BottomNav />
-        </div>
-      </BrowserRouter>
+      <AuthProvider>
+        <Toaster />
+        <Sonner position="top-center" />
+        <BrowserRouter>
+          <div className="flex min-h-[100dvh] flex-col bg-background">
+            {/* Main content area: Padding removed for mobile to allow large previews */}
+            <main className="flex-1 pb-24 px-0 sm:px-4"> 
+              <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/admin" element={<Login />} />
+                  <Route path="/view" element={<PdfViewer />} />
+                  <Route path="/admin-settings" element={<AdminSettings />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </main>
+            <BottomNav />
+          </div>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
