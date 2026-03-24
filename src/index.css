@@ -8,53 +8,85 @@
   :root {
     --background: 40 20% 97%;
     --foreground: 200 25% 10%;
+
     --card: 0 0% 100%;
     --card-foreground: 200 25% 10%;
+
     --popover: 0 0% 100%;
     --popover-foreground: 200 25% 10%;
+
     --primary: 185 60% 22%;
     --primary-foreground: 40 20% 97%;
+
     --secondary: 40 30% 92%;
     --secondary-foreground: 200 25% 10%;
+
     --muted: 40 15% 94%;
     --muted-foreground: 200 10% 45%;
+
     --accent: 32 80% 55%;
     --accent-foreground: 0 0% 100%;
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 200 15% 90%;
-    --input: 200 15% 90%;
+
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
     --ring: 185 60% 22%;
+
     --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --font-heading: 'Source Serif 4', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+
+    --gradient-hero: linear-gradient(135deg, hsl(185 60% 22%), hsl(200 50% 28%));
+    --shadow-card: 0 2px 12px -2px hsl(200 25% 10% / 0.08);
+    --shadow-card-hover: 0 8px 24px -4px hsl(200 25% 10% / 0.12);
   }
 
   .dark {
     --background: 200 25% 8%;
     --foreground: 40 20% 95%;
+    --card: 200 20% 12%;
+    --card-foreground: 40 20% 95%;
+    --popover: 200 20% 12%;
+    --popover-foreground: 40 20% 95%;
+    --primary: 185 50% 45%;
+    --primary-foreground: 200 25% 8%;
+    --secondary: 200 15% 18%;
+    --secondary-foreground: 40 20% 95%;
+    --muted: 200 15% 18%;
+    --muted-foreground: 200 10% 55%;
+    --accent: 32 80% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 200 15% 20%;
+    --input: 200 15% 20%;
+    --ring: 185 50% 45%;
   }
 }
 
-@layer utilities {
-  /* This ensures your note previews are large on all devices */
-  .note-preview-container {
-    width: 100%;
-    aspect-ratio: 3 / 4; /* A4 paper ratio */
-    overflow: hidden;
-    background: hsl(var(--muted));
+@layer base {
+  * {
+    @apply border-border;
   }
 
-  .note-preview-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top;
-    transition: transform 0.3s ease;
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
   }
-}
 
-/* Fix for standard desktop monitors wasting space */
-@media (min-width: 1280px) {
-  .container {
-    max-width: 90vw !important;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
   }
 }
