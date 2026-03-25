@@ -8,9 +8,11 @@ interface PortionAccordionProps {
   isAdmin: boolean;
   onDelete: (id: string) => void;
   onUpdated?: () => void;
+  openPreviewId?: string | null;
+  onPreviewToggle?: (id: string) => void;
 }
 
-const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAccordionProps) => {
+const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated, openPreviewId, onPreviewToggle }: PortionAccordionProps) => {
   const [openPortions, setOpenPortions] = useState<string[]>([]);
 
   const togglePortion = (portion: string) => {
@@ -24,7 +26,6 @@ const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAc
     resources: resources.filter(r => r.portion === p.value),
   }));
 
-  // Resources without a portion
   const untagged = resources.filter(r => !r.portion);
 
   return (
@@ -35,10 +36,10 @@ const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAc
           <div key={portion.value} className="rounded-lg border border-border bg-card overflow-hidden">
             <button
               onClick={() => togglePortion(portion.value)}
-              className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/40 transition-colors"
+              className="w-full flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-muted/40 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <span className="font-heading font-semibold text-card-foreground">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="font-heading font-semibold text-sm sm:text-base text-card-foreground">
                   {portion.label}
                 </span>
                 <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
@@ -56,9 +57,9 @@ const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAc
                 opacity: isOpen ? 1 : 0,
               }}
             >
-              <div className="px-3 pb-3 space-y-2">
+              <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2">
                 {portion.resources.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-3 text-center">
+                  <p className="text-xs sm:text-sm text-muted-foreground py-3 text-center">
                     No resources in this portion yet
                   </p>
                 ) : (
@@ -69,6 +70,8 @@ const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAc
                       isAdmin={isAdmin}
                       onDelete={onDelete}
                       onUpdated={onUpdated}
+                      isPreviewOpen={openPreviewId === resource.id}
+                      onPreviewToggle={onPreviewToggle}
                     />
                   ))
                 )}
@@ -79,7 +82,7 @@ const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAc
       })}
       {untagged.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground px-1">Other</p>
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground px-1">Other</p>
           {untagged.map(resource => (
             <ResourceItem
               key={resource.id}
@@ -87,6 +90,8 @@ const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAc
               isAdmin={isAdmin}
               onDelete={onDelete}
               onUpdated={onUpdated}
+              isPreviewOpen={openPreviewId === resource.id}
+              onPreviewToggle={onPreviewToggle}
             />
           ))}
         </div>
