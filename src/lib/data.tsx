@@ -9,8 +9,8 @@ export interface Subject {
 }
 
 export const classLevelOptions = [
-  { value: "11", label: "Class 11" },
   { value: "12", label: "Class 12" },
+  { value: "11", label: "Class 11" },
   { value: "diploma-1", label: "Eng. I" },
   { value: "diploma-2", label: "Eng. II" },
 ];
