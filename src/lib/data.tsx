@@ -11,8 +11,8 @@ export interface Subject {
 export const classLevelOptions = [
   { value: "11", label: "Class 11" },
   { value: "12", label: "Class 12" },
-  { value: "diploma-1", label: "Diploma 1st Sem" },
-  { value: "diploma-2", label: "Diploma 2nd Sem" },
+  { value: "diploma-1", label: "Eng. I" },
+  { value: "diploma-2", label: "Eng. II" },
 ];
 
 export const physicsPortions = [
