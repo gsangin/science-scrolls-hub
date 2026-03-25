@@ -3,6 +3,7 @@ import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -33,6 +34,7 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
   const [classLevel, setClassLevel] = useState(resource.class_level);
   const [type, setType] = useState<"notes" | "textbook">(resource.type as "notes" | "textbook");
   const [portion, setPortion] = useState(resource.portion || "");
+  const [downloadable, setDownloadable] = useState(resource.downloadable);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
@@ -50,6 +52,7 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
           class_level: classLevel,
           type,
           portion: showPortions && portion ? portion : null,
+          downloadable,
         })
         .eq("id", resource.id);
 
@@ -73,20 +76,14 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
         <div className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="editTitle">Title</Label>
-            <Input
-              id="editTitle"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+            <Input id="editTitle" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Subject</Label>
               <Select value={subject} onValueChange={(v) => { setSubject(v); setPortion(""); }}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {subjects.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
@@ -97,9 +94,7 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
             <div className="space-y-2">
               <Label>Class</Label>
               <Select value={classLevel} onValueChange={(v) => { setClassLevel(v); setPortion(""); }}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {classLevelOptions.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -113,9 +108,7 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
             <div className="space-y-2">
               <Label>Portion</Label>
               <Select value={portion} onValueChange={setPortion}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select portion" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select portion" /></SelectTrigger>
                 <SelectContent>
                   {physicsPortions.map((p) => (
                     <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
@@ -128,14 +121,20 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
           <div className="space-y-2">
             <Label>Type</Label>
             <Select value={type} onValueChange={(v) => setType(v as "notes" | "textbook")}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="notes">Notes</SelectItem>
                 <SelectItem value="textbook">Textbook</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <Label className="text-sm font-medium">Allow Download</Label>
+              <p className="text-xs text-muted-foreground">Users can download this file</p>
+            </div>
+            <Switch checked={downloadable} onCheckedChange={setDownloadable} />
           </div>
 
           <Button onClick={handleSave} className="w-full" disabled={!title || !subject || saving}>

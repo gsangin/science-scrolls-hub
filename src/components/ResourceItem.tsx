@@ -3,7 +3,7 @@ import type { Resource } from "@/lib/data";
 import { classLevelOptions, physicsPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import EditResourceDialog from "@/components/EditResourceDialog";
 
 interface ResourceItemProps {
@@ -18,7 +18,6 @@ interface ResourceItemProps {
 const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, onPreviewToggle }: ResourceItemProps) => {
   const [editOpen, setEditOpen] = useState(false);
 
-  // Use controlled preview if props provided, else internal
   const [internalPreview, setInternalPreview] = useState(false);
   const previewOpen = isPreviewOpen !== undefined ? isPreviewOpen : internalPreview;
 
@@ -32,7 +31,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
 
   const closePreview = () => {
     if (onPreviewToggle) {
-      onPreviewToggle(""); // close all
+      onPreviewToggle("");
     } else {
       setInternalPreview(false);
     }
@@ -42,7 +41,10 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
     .from("study-materials")
     .getPublicUrl(resource.file_path).data.publicUrl;
 
-  const viewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}`;
+  // Use Google Docs viewer for cross-browser PDF rendering
+  const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(publicUrl)}&embedded=true`;
+
+  const fullScreenViewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
 
   const handleDownload = () => {
     window.open(publicUrl, "_blank");
@@ -86,13 +88,20 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setEditOpen(true)} title="Edit">
                 <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={handleDownload}>
-                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </Button>
+              {resource.downloadable && (
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={handleDownload}>
+                  <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </Button>
+              )}
               <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={() => onDelete(resource.id)}>
                 <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
             </div>
+          )}
+          {!isAdmin && resource.downloadable && (
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={handleDownload}>
+              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </Button>
           )}
         </div>
 
@@ -110,7 +119,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
                 <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 Close
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-xs sm:text-sm text-muted-foreground hover:text-primary gap-1" onClick={() => window.open(viewerUrl, "_blank")}>
+              <Button variant="ghost" size="sm" className="h-7 text-xs sm:text-sm text-muted-foreground hover:text-primary gap-1" onClick={() => window.open(fullScreenViewerUrl, "_blank")}>
                 <Maximize2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 Full Screen
               </Button>
@@ -118,10 +127,11 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
           </div>
           {previewOpen && (
             <iframe
-              src={publicUrl}
+              src={googleViewerUrl}
               title={resource.title}
               className="w-full border-0"
               style={{ height: "calc(90vh - 40px)" }}
+              sandbox="allow-scripts allow-same-origin allow-popups"
             />
           )}
         </div>

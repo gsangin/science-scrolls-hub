@@ -3,6 +3,7 @@ import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -30,9 +31,10 @@ interface UploadDialogProps {
 const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
-  const [classLevel, setClassLevel] = useState("11");
+  const [classLevel, setClassLevel] = useState("12");
   const [type, setType] = useState<"notes" | "textbook">("notes");
   const [portion, setPortion] = useState("");
+  const [downloadable, setDownloadable] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
@@ -71,6 +73,7 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
         file_path: filePath,
         file_size: file.size,
         portion: showPortions && portion ? portion : null,
+        downloadable,
       });
 
       if (dbError) throw dbError;
@@ -78,9 +81,10 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
       toast({ title: "Resource uploaded!", description: `"${title}" has been added.` });
       setTitle("");
       setSubject("");
-      setClassLevel("11");
+      setClassLevel("12");
       setType("notes");
       setPortion("");
+      setDownloadable(true);
       setFile(null);
       onUploaded();
       onClose();
@@ -178,6 +182,14 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
                 <SelectItem value="textbook">Textbook</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <Label className="text-sm font-medium">Allow Download</Label>
+              <p className="text-xs text-muted-foreground">Users can download this file</p>
+            </div>
+            <Switch checked={downloadable} onCheckedChange={setDownloadable} />
           </div>
 
           <Button type="submit" className="w-full" disabled={!title || !subject || !file || uploading}>

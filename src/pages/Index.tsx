@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 const Index = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [classFilter, setClassFilter] = useState("11");
+  const [classFilter, setClassFilter] = useState("12");
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [openPreviewId, setOpenPreviewId] = useState<string | null>(null);
