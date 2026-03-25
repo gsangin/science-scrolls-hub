@@ -42,4 +42,5 @@ export interface Resource {
   created_at: string;
   user_id: string;
   portion: string | null;
+  downloadable: boolean;
 }
