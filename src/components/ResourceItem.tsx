@@ -119,10 +119,6 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
                 <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 Close
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-xs sm:text-sm text-muted-foreground hover:text-primary gap-1" onClick={() => window.open(fullScreenViewerUrl, "_blank")}>
-                <Maximize2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                Full Screen
-              </Button>
             </div>
           </div>
           {previewOpen && (
