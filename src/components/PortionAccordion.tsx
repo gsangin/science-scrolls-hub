@@ -86,8 +86,6 @@ const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAc
               isAdmin={isAdmin}
               onDelete={onDelete}
               onUpdated={onUpdated}
-              isPreviewOpen={openPreviewId === resource.id}
-              onPreviewToggle={onPreviewToggle}
             />
           ))}
         </div>

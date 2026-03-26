@@ -186,8 +186,6 @@ const Index = () => {
                   isAdmin={!!user}
                   onDelete={handleDelete}
                   onUpdated={fetchResources}
-                  isPreviewOpen={openPreviewId === resource.id}
-                  onPreviewToggle={handlePreviewToggle}
                 />
               ))
             )}
