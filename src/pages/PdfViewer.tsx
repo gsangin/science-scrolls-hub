@@ -1,12 +1,14 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const PdfViewer = () => {
   const [searchParams] = useSearchParams();
   const url = searchParams.get("url");
   const title = searchParams.get("title") || "Document";
   const downloadable = searchParams.get("downloadable") === "1";
+  const [iframeError, setIframeError] = useState(false);
 
   if (!url) {
     return (
@@ -16,7 +18,12 @@ const PdfViewer = () => {
     );
   }
 
-  const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+  // Use direct URL for browser-native PDF rendering (no size limit)
+  // Fall back to Google Viewer for non-PDF files
+  const isPdf = url.toLowerCase().includes(".pdf");
+  const viewerUrl = isPdf && !iframeError
+    ? url
+    : `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -40,11 +47,12 @@ const PdfViewer = () => {
       </header>
       <div className="flex-1">
         <iframe
-          src={googleViewerUrl}
+          src={viewerUrl}
           title={title}
           className="w-full h-full border-0"
           style={{ minHeight: "calc(100vh - 57px)" }}
           sandbox="allow-scripts allow-same-origin allow-popups"
+          onError={() => isPdf && setIframeError(true)}
         />
       </div>
     </div>
