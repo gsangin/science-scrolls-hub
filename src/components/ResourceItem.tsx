@@ -44,10 +44,10 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
   // Use Google Docs viewer for cross-browser PDF rendering
   const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(publicUrl)}&embedded=true`;
 
-  const fullScreenViewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
+  const viewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
 
   const handleDownload = () => {
-    window.open(publicUrl, "_blank");
+    window.open(viewerUrl, "_blank");
   };
 
   return (
