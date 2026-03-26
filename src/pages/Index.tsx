@@ -78,11 +78,7 @@ const Index = () => {
           <div className="absolute -bottom-10 -left-10 h-60 w-60 rounded-full bg-accent/20" />
         </div>
         {user && (
-          <div className="absolute right-4 sm:right-6 top-4 sm:top-6 flex items-center gap-2 sm:gap-3">
-            <Button size="sm" variant="secondary" onClick={() => setUploadOpen(true)}>
-              <Upload className="w-4 h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Upload</span>
-            </Button>
+          <div className="absolute top-4 sm:top-6 left-4 sm:left-6 right-4 sm:right-6 flex items-center justify-between">
             <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/admin-settings")}>
               <Settings className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Settings</span>

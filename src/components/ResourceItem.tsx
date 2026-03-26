@@ -121,13 +121,14 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
               </Button>
             </div>
           </div>
-          {previewOpen && (
+            {previewOpen && (
             <iframe
               src={googleViewerUrl}
               title={resource.title}
               className="w-full border-0"
-              style={{ height: "calc(90vh - 40px)" }}
+              style={{ height: "70vh" }}
               sandbox="allow-scripts allow-same-origin allow-popups"
+              loading="lazy"
             />
           )}
         </div>
