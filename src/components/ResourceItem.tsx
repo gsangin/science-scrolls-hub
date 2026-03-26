@@ -1,4 +1,4 @@
-import { FileText, BookOpen, Calendar, Trash2, Download, X, Pencil } from "lucide-react";
+import { FileText, BookOpen, Calendar, Trash2, Pencil } from "lucide-react";
 import type { Resource } from "@/lib/data";
 import { classLevelOptions, physicsPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
@@ -11,42 +11,18 @@ interface ResourceItemProps {
   isAdmin: boolean;
   onDelete: (id: string) => void;
   onUpdated?: () => void;
-  isPreviewOpen?: boolean;
-  onPreviewToggle?: (id: string) => void;
 }
 
-const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, onPreviewToggle }: ResourceItemProps) => {
+const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated }: ResourceItemProps) => {
   const [editOpen, setEditOpen] = useState(false);
-
-  const [internalPreview, setInternalPreview] = useState(false);
-  const previewOpen = isPreviewOpen !== undefined ? isPreviewOpen : internalPreview;
-
-  const togglePreview = () => {
-    if (onPreviewToggle) {
-      onPreviewToggle(resource.id);
-    } else {
-      setInternalPreview(prev => !prev);
-    }
-  };
-
-  const closePreview = () => {
-    if (onPreviewToggle) {
-      onPreviewToggle("");
-    } else {
-      setInternalPreview(false);
-    }
-  };
 
   const publicUrl = supabase.storage
     .from("study-materials")
     .getPublicUrl(resource.file_path).data.publicUrl;
 
-  // Use Google Docs viewer for cross-browser PDF rendering
-  const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(publicUrl)}&embedded=true`;
-
   const viewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
 
-  const handleDownload = () => {
+  const handleOpen = () => {
     window.open(viewerUrl, "_blank");
   };
 
@@ -61,7 +37,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
           </div>
           <div className="flex-1 min-w-0">
             <button
-              onClick={togglePreview}
+              onClick={handleOpen}
               className="font-heading font-semibold text-sm sm:text-base text-card-foreground truncate block hover:text-primary hover:underline transition-colors text-left max-w-full"
             >
               {resource.title}
@@ -88,48 +64,10 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setEditOpen(true)} title="Edit">
                 <Pencil className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
-              {resource.downloadable && (
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={handleDownload}>
-                  <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </Button>
-              )}
               <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={() => onDelete(resource.id)}>
                 <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Button>
             </div>
-          )}
-          {!isAdmin && resource.downloadable && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={handleDownload}>
-              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </Button>
-          )}
-        </div>
-
-        <div
-          className="border-t border-border overflow-hidden transition-all duration-300 ease-in-out"
-          style={{
-            maxHeight: previewOpen ? "80vh" : "0px",
-            opacity: previewOpen ? 1 : 0,
-          }}
-        >
-          <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-muted/40">
-            <span className="text-xs sm:text-sm text-muted-foreground font-medium">Preview</span>
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="sm" className="h-7 text-xs sm:text-sm text-muted-foreground hover:text-destructive gap-1" onClick={closePreview}>
-                <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                Close
-              </Button>
-            </div>
-          </div>
-            {previewOpen && (
-            <iframe
-              src={googleViewerUrl}
-              title={resource.title}
-              className="w-full border-0"
-              style={{ height: "70vh" }}
-              sandbox="allow-scripts allow-same-origin allow-popups"
-              loading="lazy"
-            />
           )}
         </div>
       </div>

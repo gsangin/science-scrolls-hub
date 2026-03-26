@@ -20,7 +20,6 @@ const Index = () => {
   const [classFilter, setClassFilter] = useState("12");
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [openPreviewId, setOpenPreviewId] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -65,9 +64,6 @@ const Index = () => {
     }
   };
 
-  const handlePreviewToggle = (id: string) => {
-    setOpenPreviewId(prev => (prev === id ? null : id));
-  };
 
   return (
     <div className="min-h-screen">
@@ -178,8 +174,6 @@ const Index = () => {
                 isAdmin={!!user}
                 onDelete={handleDelete}
                 onUpdated={fetchResources}
-                openPreviewId={openPreviewId}
-                onPreviewToggle={handlePreviewToggle}
               />
             ) : (
               filteredResources.map(resource => (
@@ -189,8 +183,6 @@ const Index = () => {
                   isAdmin={!!user}
                   onDelete={handleDelete}
                   onUpdated={fetchResources}
-                  isPreviewOpen={openPreviewId === resource.id}
-                  onPreviewToggle={handlePreviewToggle}
                 />
               ))
             )}
