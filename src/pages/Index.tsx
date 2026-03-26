@@ -64,9 +64,6 @@ const Index = () => {
     }
   };
 
-  const handlePreviewToggle = (id: string) => {
-    setOpenPreviewId(prev => (prev === id ? null : id));
-  };
 
   return (
     <div className="min-h-screen">
