@@ -30,9 +30,11 @@ const PdfViewer = () => {
           {title}
         </h1>
         {downloadable && (
-          <Button variant="outline" size="sm" onClick={() => window.open(url, "_blank")}>
-            <Download className="w-4 h-4 mr-2" />
-            Download
+          <Button variant="outline" size="sm" asChild>
+            <a href={url} download>
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </a>
           </Button>
         )}
       </header>

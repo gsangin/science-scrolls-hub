@@ -1,4 +1,4 @@
-import { FileText, BookOpen, Calendar, Trash2, Download, Maximize2, X, Pencil } from "lucide-react";
+import { FileText, BookOpen, Calendar, Trash2, Download, X, Pencil } from "lucide-react";
 import type { Resource } from "@/lib/data";
 import { classLevelOptions, physicsPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
@@ -44,10 +44,10 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
   // Use Google Docs viewer for cross-browser PDF rendering
   const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(publicUrl)}&embedded=true`;
 
-  const fullScreenViewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
+  const viewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
 
   const handleDownload = () => {
-    window.open(publicUrl, "_blank");
+    window.open(viewerUrl, "_blank");
   };
 
   return (
@@ -108,7 +108,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
         <div
           className="border-t border-border overflow-hidden transition-all duration-300 ease-in-out"
           style={{
-            maxHeight: previewOpen ? "90vh" : "0px",
+            maxHeight: previewOpen ? "80vh" : "0px",
             opacity: previewOpen ? 1 : 0,
           }}
         >
@@ -119,19 +119,16 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
                 <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 Close
               </Button>
-              <Button variant="ghost" size="sm" className="h-7 text-xs sm:text-sm text-muted-foreground hover:text-primary gap-1" onClick={() => window.open(fullScreenViewerUrl, "_blank")}>
-                <Maximize2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                Full Screen
-              </Button>
             </div>
           </div>
-          {previewOpen && (
+            {previewOpen && (
             <iframe
               src={googleViewerUrl}
               title={resource.title}
               className="w-full border-0"
-              style={{ height: "calc(90vh - 40px)" }}
+              style={{ height: "70vh" }}
               sandbox="allow-scripts allow-same-origin allow-popups"
+              loading="lazy"
             />
           )}
         </div>
