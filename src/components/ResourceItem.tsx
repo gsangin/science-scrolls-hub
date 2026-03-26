@@ -1,4 +1,4 @@
-import { FileText, BookOpen, Calendar, Trash2, Download, Maximize2, X, Pencil } from "lucide-react";
+import { FileText, BookOpen, Calendar, Trash2, Download, X, Pencil } from "lucide-react";
 import type { Resource } from "@/lib/data";
 import { classLevelOptions, physicsPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
