@@ -177,8 +177,6 @@ const Index = () => {
                 isAdmin={!!user}
                 onDelete={handleDelete}
                 onUpdated={fetchResources}
-                openPreviewId={openPreviewId}
-                onPreviewToggle={handlePreviewToggle}
               />
             ) : (
               filteredResources.map(resource => (
