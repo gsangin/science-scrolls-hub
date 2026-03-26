@@ -108,7 +108,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated, isPreviewOpen, o
         <div
           className="border-t border-border overflow-hidden transition-all duration-300 ease-in-out"
           style={{
-            maxHeight: previewOpen ? "90vh" : "0px",
+            maxHeight: previewOpen ? "80vh" : "0px",
             opacity: previewOpen ? 1 : 0,
           }}
         >
