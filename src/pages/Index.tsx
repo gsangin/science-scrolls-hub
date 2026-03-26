@@ -20,7 +20,6 @@ const Index = () => {
   const [classFilter, setClassFilter] = useState("12");
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [openPreviewId, setOpenPreviewId] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
