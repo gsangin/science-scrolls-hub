@@ -8,11 +8,9 @@ interface PortionAccordionProps {
   isAdmin: boolean;
   onDelete: (id: string) => void;
   onUpdated?: () => void;
-  openPreviewId?: string | null;
-  onPreviewToggle?: (id: string) => void;
 }
 
-const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated, openPreviewId, onPreviewToggle }: PortionAccordionProps) => {
+const PortionAccordion = ({ resources, isAdmin, onDelete, onUpdated }: PortionAccordionProps) => {
   const [openPortions, setOpenPortions] = useState<string[]>([]);
 
   const togglePortion = (portion: string) => {
