@@ -45,13 +45,24 @@ const Index = () => {
   );
 
   const filteredResources = useMemo(() => {
+    if (!selectedSubject || !selectedClass) return [];
     return resources.filter(r => {
-      if (selectedSubject && r.subject !== selectedSubject) return false;
-      if (r.class_level !== classFilter) return false;
+      if (r.subject !== selectedSubject) return false;
+      if (r.class_level !== selectedClass) return false;
       if (search && !r.title.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [resources, selectedSubject, classFilter, search]);
+  }, [resources, selectedSubject, selectedClass, search]);
+
+  const handleSubjectClick = (subjectId: string) => {
+    if (selectedSubject === subjectId) {
+      setSelectedSubject(null);
+      setSelectedClass(null);
+    } else {
+      setSelectedSubject(subjectId);
+      setSelectedClass(null);
+    }
+  };
 
   const handleDelete = async (id: string) => {
     const resource = resources.find(r => r.id === id);
