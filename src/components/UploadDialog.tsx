@@ -3,6 +3,7 @@ import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -16,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { subjects, classLevelOptions } from "@/lib/data";
+import { subjects, classLevelOptions, physicsPortions, chemistryPortions } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -30,16 +31,26 @@ interface UploadDialogProps {
 const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
-  const [classLevel, setClassLevel] = useState("11");
+  const [classLevel, setClassLevel] = useState("12");
   const [type, setType] = useState<"notes" | "textbook">("notes");
+  const [portion, setPortion] = useState("");
+  const [downloadable, setDownloadable] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
+  const showPortions = subject === "physics" || subject === "chemistry";
+  const currentPortions = subject === "physics" ? physicsPortions : chemistryPortions;
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f) {
+      if (f.size > 50 * 1024 * 1024) {
+        toast({ title: "File too large", description: "Maximum file size is 50MB.", variant: "destructive" });
+        e.target.value = "";
+        return;
+      }
       setFile(f);
       if (!title) setTitle(f.name.replace(/\.[^/.]+$/, ""));
     }
@@ -51,15 +62,14 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
 
     setUploading(true);
     try {
-      // Upload file to storage
-      const filePath = `${user.id}/${Date.now()}_${file.name}`;
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const filePath = `${user.id}/${Date.now()}_${sanitizedName}`;
       const { error: storageError } = await supabase.storage
         .from("study-materials")
         .upload(filePath, file);
 
       if (storageError) throw storageError;
 
-      // Insert resource record
       const { error: dbError } = await supabase.from("resources").insert({
         user_id: user.id,
         title,
@@ -69,6 +79,8 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
         file_name: file.name,
         file_path: filePath,
         file_size: file.size,
+        portion: showPortions && portion ? portion : null,
+        downloadable,
       });
 
       if (dbError) throw dbError;
@@ -76,13 +88,16 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
       toast({ title: "Resource uploaded!", description: `"${title}" has been added.` });
       setTitle("");
       setSubject("");
-      setClassLevel("11");
+      setClassLevel("12");
       setType("notes");
+      setPortion("");
+      setDownloadable(true);
       setFile(null);
       onUploaded();
       onClose();
-    } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : "An unknown error occurred";
+      toast({ title: "Upload failed", description: errorMsg, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -122,7 +137,7 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Subject</Label>
-              <Select value={subject} onValueChange={setSubject}>
+              <Select value={subject} onValueChange={(v) => { setSubject(v); setPortion(""); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -135,7 +150,7 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
             </div>
             <div className="space-y-2">
               <Label>Class</Label>
-              <Select value={classLevel} onValueChange={setClassLevel}>
+              <Select value={classLevel} onValueChange={(v) => { setClassLevel(v); setPortion(""); }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -148,6 +163,22 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
             </div>
           </div>
 
+          {showPortions && (
+            <div className="space-y-2">
+              <Label>Portion (optional)</Label>
+              <Select value={portion} onValueChange={setPortion}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select portion" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentPortions.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label>Type</Label>
             <Select value={type} onValueChange={(v) => setType(v as "notes" | "textbook")}>
@@ -159,6 +190,14 @@ const UploadDialog = ({ open, onClose, onUploaded }: UploadDialogProps) => {
                 <SelectItem value="textbook">Textbook</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <Label className="text-sm font-medium">Allow Download</Label>
+              <p className="text-xs text-muted-foreground">Users can download this file</p>
+            </div>
+            <Switch checked={downloadable} onCheckedChange={setDownloadable} />
           </div>
 
           <Button type="submit" className="w-full" disabled={!title || !subject || !file || uploading}>

@@ -45,10 +45,12 @@ export type Database = {
         Row: {
           class_level: string
           created_at: string
+          downloadable: boolean
           file_name: string
           file_path: string
           file_size: number | null
           id: string
+          portion: string | null
           subject: string
           title: string
           type: string
@@ -57,10 +59,12 @@ export type Database = {
         Insert: {
           class_level: string
           created_at?: string
+          downloadable?: boolean
           file_name: string
           file_path: string
           file_size?: number | null
           id?: string
+          portion?: string | null
           subject: string
           title: string
           type: string
@@ -69,10 +73,12 @@ export type Database = {
         Update: {
           class_level?: string
           created_at?: string
+          downloadable?: boolean
           file_name?: string
           file_path?: string
           file_size?: number | null
           id?: string
+          portion?: string | null
           subject?: string
           title?: string
           type?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.resources ADD COLUMN downloadable boolean NOT NULL DEFAULT true;

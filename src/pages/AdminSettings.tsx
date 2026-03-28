@@ -25,7 +25,6 @@ const AdminSettings = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate("/admin");
       return;
     }
     const fetch = async () => {
@@ -60,8 +59,9 @@ const AdminSettings = () => {
         .getPublicUrl(filePath);
       setPhotoUrl(urlData.publicUrl);
       toast({ title: "Photo uploaded" });
-    } catch (err: any) {
-      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "An unknown error occurred";
+      toast({ title: "Upload failed", description: errorMsg, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -88,8 +88,9 @@ const AdminSettings = () => {
         .eq("id", settingsId);
       if (error) throw error;
       toast({ title: "Settings saved!" });
-    } catch (err: any) {
-      toast({ title: "Save failed", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "An unknown error occurred";
+      toast({ title: "Save failed", description: errorMsg, variant: "destructive" });
     } finally {
       setSaving(false);
     }
