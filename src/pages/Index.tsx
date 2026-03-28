@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SubjectCard from "@/components/SubjectCard";
 import ResourceItem from "@/components/ResourceItem";
 import PortionAccordion from "@/components/PortionAccordion";
@@ -17,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 const Index = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [classFilter, setClassFilter] = useState("12");
+  const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const { user, signOut } = useAuth();
@@ -75,10 +74,8 @@ const Index = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen">
-      {/* Hero */}
       <header className="relative overflow-hidden bg-primary px-4 sm:px-6 py-10 sm:py-16 text-primary-foreground">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent/40" />
@@ -116,7 +113,6 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10">
         {/* Subject Grid */}
         <section>
@@ -133,7 +129,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Class Selection - shown when subject is selected */}
+        {/* Class Selection */}
         {selectedSubject && (
           <section className="mt-8 sm:mt-10 animate-in fade-in slide-in-from-top-2 duration-300">
             <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground mb-4 sm:mb-5">
@@ -157,16 +153,14 @@ const Index = () => {
           </section>
         )}
 
-        {/* Resources - shown when both subject and class are selected */}
+        {/* Resources */}
         {selectedSubject && selectedClass && (
           <section className="mt-8 sm:mt-10 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground">
-                {subjects.find(s => s.id === selectedSubject)?.name} — {classLevelOptions.find(c => c.value === selectedClass)?.label} Resources
-              </h2>
-            </div>
+            <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground mb-4">
+              {subjects.find(s => s.id === selectedSubject)?.name} — {classLevelOptions.find(c => c.value === selectedClass)?.label}
+            </h2>
 
-            <div className="relative mt-3 sm:mt-4">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search resources..."
@@ -180,11 +174,9 @@ const Index = () => {
               {filteredResources.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-12 sm:py-16 text-center px-4">
                   <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground/50 mb-3 sm:mb-4" />
-                  <p className="text-base sm:text-lg font-heading font-semibold text-muted-foreground">
-                    No resources yet
-                  </p>
+                  <p className="text-base sm:text-lg font-heading font-semibold text-muted-foreground">No resources yet</p>
                   <p className="mt-1 text-xs sm:text-sm text-muted-foreground/70">
-                    {user ? "Upload your first notes or textbook to get started" : "Check back soon for study materials"}
+                    {user ? "Upload notes or textbooks to get started" : "Check back soon for study materials"}
                   </p>
                 </div>
               ) : selectedSubject === "physics" && (selectedClass === "11" || selectedClass === "12") ? (
