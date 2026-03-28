@@ -133,72 +133,81 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Filters & Resource List */}
-        <section className="mt-8 sm:mt-10">
-          <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground">
-              {selectedSubject
-                ? `${subjects.find(s => s.id === selectedSubject)?.name} Resources`
-                : "All Resources"}
+        {/* Class Selection - shown when subject is selected */}
+        {selectedSubject && (
+          <section className="mt-8 sm:mt-10 animate-in fade-in slide-in-from-top-2 duration-300">
+            <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground mb-4 sm:mb-5">
+              {subjects.find(s => s.id === selectedSubject)?.name} — Select Class
             </h2>
-            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-              <Tabs value={classFilter} onValueChange={setClassFilter}>
-                <TabsList className="w-max">
-                  {classLevelOptions.map((opt) => (
-                    <TabsTrigger key={opt.value} value={opt.value} className="text-xs sm:text-sm px-2.5 sm:px-3">{opt.label}</TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4">
+              {classLevelOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSelectedClass(prev => prev === opt.value ? null : opt.value)}
+                  className={`rounded-xl border p-4 sm:p-5 text-center font-heading font-semibold text-sm sm:text-base transition-all duration-200 hover:shadow-md ${
+                    selectedClass === opt.value
+                      ? "border-primary bg-primary/5 shadow-sm text-primary"
+                      : "border-border bg-card text-card-foreground hover:border-primary/30"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
-          </div>
+          </section>
+        )}
 
-          <div className="relative mt-3 sm:mt-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search resources..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+        {/* Resources - shown when both subject and class are selected */}
+        {selectedSubject && selectedClass && (
+          <section className="mt-8 sm:mt-10 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground">
+                {subjects.find(s => s.id === selectedSubject)?.name} — {classLevelOptions.find(c => c.value === selectedClass)?.label} Resources
+              </h2>
+            </div>
 
-          <div className="mt-4 sm:mt-5 space-y-2 sm:space-y-3">
-            {filteredResources.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-12 sm:py-16 text-center px-4">
-                <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground/50 mb-3 sm:mb-4" />
-                <p className="text-base sm:text-lg font-heading font-semibold text-muted-foreground">
-                  No resources yet
-                </p>
-                <p className="mt-1 text-xs sm:text-sm text-muted-foreground/70">
-                  {user ? "Upload your first notes or textbook to get started" : "Check back soon for study materials"}
-                </p>
-                {user && (
-                  <Button variant="outline" className="mt-4" onClick={() => setUploadOpen(true)}>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload
-                  </Button>
-                )}
-              </div>
-            ) : selectedSubject === "physics" && (classFilter === "11" || classFilter === "12") ? (
-              <PortionAccordion
-                resources={filteredResources}
-                isAdmin={!!user}
-                onDelete={handleDelete}
-                onUpdated={fetchResources}
+            <div className="relative mt-3 sm:mt-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search resources..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
               />
-            ) : (
-              filteredResources.map(resource => (
-                <ResourceItem
-                  key={resource.id}
-                  resource={resource}
+            </div>
+
+            <div className="mt-4 sm:mt-5 space-y-2 sm:space-y-3">
+              {filteredResources.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-12 sm:py-16 text-center px-4">
+                  <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground/50 mb-3 sm:mb-4" />
+                  <p className="text-base sm:text-lg font-heading font-semibold text-muted-foreground">
+                    No resources yet
+                  </p>
+                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground/70">
+                    {user ? "Upload your first notes or textbook to get started" : "Check back soon for study materials"}
+                  </p>
+                </div>
+              ) : selectedSubject === "physics" && (selectedClass === "11" || selectedClass === "12") ? (
+                <PortionAccordion
+                  resources={filteredResources}
                   isAdmin={!!user}
                   onDelete={handleDelete}
                   onUpdated={fetchResources}
                 />
-              ))
-            )}
-          </div>
-        </section>
+              ) : (
+                filteredResources.map(resource => (
+                  <ResourceItem
+                    key={resource.id}
+                    resource={resource}
+                    isAdmin={!!user}
+                    onDelete={handleDelete}
+                    onUpdated={fetchResources}
+                  />
+                ))
+              )}
+            </div>
+          </section>
+        )}
       </main>
 
       <AuthorFooter />
