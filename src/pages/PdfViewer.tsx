@@ -1,12 +1,40 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+
+const LazyPage = ({ pageNumber, width }: { pageNumber: number; width: number }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
+      { rootMargin: "600px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} style={{ minHeight: width * 1.4 }} className="flex items-center justify-center">
+      {isVisible ? (
+        <Page pageNumber={pageNumber} width={width} className="shadow-md" loading="" />
+      ) : (
+        <div className="flex items-center justify-center h-20">
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        </div>
+      )}
+    </div>
+  );
+};
 
 const PdfViewer = () => {
   const [searchParams] = useSearchParams();
@@ -30,14 +58,11 @@ const PdfViewer = () => {
     setLoading(false);
   }, []);
 
-  // Measure container width for responsive page rendering
   const measuredRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
       containerRef.current = node;
       const observer = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setContainerWidth(entry.contentRect.width);
-        }
+        for (const entry of entries) setContainerWidth(entry.contentRect.width);
       });
       observer.observe(node);
       setContainerWidth(node.clientWidth);
@@ -99,13 +124,7 @@ const PdfViewer = () => {
           className={`flex flex-col items-center gap-2 ${loading || error ? "hidden" : ""}`}
         >
           {Array.from({ length: numPages }, (_, i) => (
-            <Page
-              key={i}
-              pageNumber={i + 1}
-              width={pageWidth}
-              className="shadow-md"
-              loading=""
-            />
+            <LazyPage key={i} pageNumber={i + 1} width={pageWidth} />
           ))}
         </Document>
       </div>
