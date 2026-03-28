@@ -1,12 +1,48 @@
 import { useSearchParams, Link } from "react-router-dom";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useCallback, useRef } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
 const PdfViewer = () => {
   const [searchParams] = useSearchParams();
   const url = searchParams.get("url");
   const title = searchParams.get("title") || "Document";
   const downloadable = searchParams.get("downloadable") === "1";
+
+  const [numPages, setNumPages] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(800);
+
+  const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+    setLoading(false);
+  }, []);
+
+  const onDocumentLoadError = useCallback(() => {
+    setError(true);
+    setLoading(false);
+  }, []);
+
+  // Measure container width for responsive page rendering
+  const measuredRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      containerRef.current = node;
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setContainerWidth(entry.contentRect.width);
+        }
+      });
+      observer.observe(node);
+      setContainerWidth(node.clientWidth);
+    }
+  }, []);
 
   if (!url) {
     return (
@@ -16,11 +52,11 @@ const PdfViewer = () => {
     );
   }
 
-  const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+  const pageWidth = Math.min(containerWidth - 16, 1200);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="flex items-center gap-3 border-b border-border px-4 py-3">
+      <header className="flex items-center gap-3 border-b border-border px-4 py-3 sticky top-0 bg-background z-10">
         <Button variant="ghost" size="icon" asChild>
           <Link to="/">
             <ArrowLeft className="w-5 h-5" />
@@ -38,14 +74,40 @@ const PdfViewer = () => {
           </Button>
         )}
       </header>
-      <div className="flex-1">
-        <iframe
-          src={googleViewerUrl}
-          title={title}
-          className="w-full h-full border-0"
-          style={{ minHeight: "calc(100vh - 57px)" }}
-          sandbox="allow-scripts allow-same-origin allow-popups"
-        />
+
+      <div ref={measuredRef} className="flex-1 overflow-auto flex justify-center bg-muted/30 p-2 sm:p-4">
+        {loading && !error && (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        )}
+
+        {error && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <p className="text-muted-foreground">Failed to load document.</p>
+            <Button variant="outline" onClick={() => { setError(false); setLoading(true); }}>
+              Retry
+            </Button>
+          </div>
+        )}
+
+        <Document
+          file={url}
+          onLoadSuccess={onDocumentLoadSuccess}
+          onLoadError={onDocumentLoadError}
+          loading=""
+          className={`flex flex-col items-center gap-2 ${loading || error ? "hidden" : ""}`}
+        >
+          {Array.from({ length: numPages }, (_, i) => (
+            <Page
+              key={i}
+              pageNumber={i + 1}
+              width={pageWidth}
+              className="shadow-md"
+              loading=""
+            />
+          ))}
+        </Document>
       </div>
     </div>
   );
