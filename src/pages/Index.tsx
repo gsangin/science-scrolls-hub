@@ -127,7 +127,7 @@ const Index = () => {
                 key={subject.id}
                 subject={subject}
                 isSelected={selectedSubject === subject.id}
-                onClick={() => setSelectedSubject(prev => (prev === subject.id ? null : subject.id))}
+                onClick={() => handleSubjectClick(subject.id)}
               />
             ))}
           </div>
