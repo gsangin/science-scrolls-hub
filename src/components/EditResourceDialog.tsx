@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { subjects, classLevelOptions, physicsPortions, type Resource } from "@/lib/data";
+import { subjects, classLevelOptions, physicsPortions, chemistryPortions, type Resource } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
