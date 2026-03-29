@@ -231,6 +231,18 @@ const Index = () => {
         )}
       </main>
 
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-8">
+        <div className="rounded-xl border border-border bg-card p-6 text-center">
+          <MessageSquare className="w-8 h-8 mx-auto text-primary mb-3" />
+          <h3 className="font-heading text-lg font-semibold text-card-foreground">
+            Your feedbacks are highly appreciated
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Use the Request / Comment option under each class to share your thoughts, suggestions, or request resources.
+          </p>
+        </div>
+      </section>
+
       <AuthorFooter />
 
       {user && (
