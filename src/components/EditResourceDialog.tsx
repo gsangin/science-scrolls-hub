@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { subjects, classLevelOptions, physicsPortions, type Resource } from "@/lib/data";
+import { subjects, classLevelOptions, physicsPortions, chemistryPortions, type Resource } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -38,7 +38,8 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  const showPortions = subject === "physics" && (classLevel === "11" || classLevel === "12");
+  const showPortions = subject === "physics" || subject === "chemistry";
+  const currentPortions = subject === "physics" ? physicsPortions : chemistryPortions;
 
   const handleSave = async () => {
     if (!title || !subject) return;
@@ -110,7 +111,7 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
               <Select value={portion} onValueChange={setPortion}>
                 <SelectTrigger><SelectValue placeholder="Select portion" /></SelectTrigger>
                 <SelectContent>
-                  {physicsPortions.map((p) => (
+                  {currentPortions.map((p) => (
                     <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                   ))}
                 </SelectContent>
