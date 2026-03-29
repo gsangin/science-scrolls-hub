@@ -219,6 +219,14 @@ const Index = () => {
                 ))
               )}
             </div>
+
+            <CommentsSection
+              subject={selectedSubject}
+              classLevel={selectedClass}
+              subjectName={subjects.find(s => s.id === selectedSubject)?.name || ""}
+              className={classLevelOptions.find(c => c.value === selectedClass)?.label || ""}
+              isAdmin={!!user}
+            />
           </section>
         )}
       </main>
