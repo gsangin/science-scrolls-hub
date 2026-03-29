@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import SubjectCard from "@/components/SubjectCard";
 import ResourceItem from "@/components/ResourceItem";
 import PortionAccordion from "@/components/PortionAccordion";
+import CommentsSection from "@/components/CommentsSection";
 import UploadDialog from "@/components/UploadDialog";
 import AuthorFooter from "@/components/AuthorFooter";
 import { subjects, classLevelOptions, type Resource } from "@/lib/data";
