@@ -111,7 +111,7 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
               <Select value={portion} onValueChange={setPortion}>
                 <SelectTrigger><SelectValue placeholder="Select portion" /></SelectTrigger>
                 <SelectContent>
-                  {physicsPortions.map((p) => (
+                  {currentPortions.map((p) => (
                     <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                   ))}
                 </SelectContent>
