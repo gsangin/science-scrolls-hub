@@ -38,7 +38,8 @@ const EditResourceDialog = ({ open, onClose, resource, onUpdated }: EditResource
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  const showPortions = subject === "physics" && (classLevel === "11" || classLevel === "12");
+  const showPortions = subject === "physics" || subject === "chemistry";
+  const currentPortions = subject === "physics" ? physicsPortions : chemistryPortions;
 
   const handleSave = async () => {
     if (!title || !subject) return;
