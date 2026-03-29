@@ -191,15 +191,7 @@ const Index = () => {
             </div>
 
             <div className="mt-4 sm:mt-5 space-y-2 sm:space-y-3">
-              {filteredResources.length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-12 sm:py-16 text-center px-4">
-                  <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground/50 mb-3 sm:mb-4" />
-                  <p className="text-base sm:text-lg font-heading font-semibold text-muted-foreground">No resources yet</p>
-                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground/70">
-                    {user ? "Upload notes or textbooks to get started" : "Check back soon for study materials"}
-                  </p>
-                </div>
-              ) : (selectedSubject === "physics" || selectedSubject === "chemistry") ? (
+              {(selectedSubject === "physics" || selectedSubject === "chemistry") ? (
                 <PortionAccordion
                   resources={filteredResources}
                   subject={selectedSubject!}
@@ -207,6 +199,14 @@ const Index = () => {
                   onDelete={handleDelete}
                   onUpdated={handleUpdate}
                 />
+              ) : filteredResources.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-12 sm:py-16 text-center px-4">
+                  <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground/50 mb-3 sm:mb-4" />
+                  <p className="text-base sm:text-lg font-heading font-semibold text-muted-foreground">No resources yet</p>
+                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground/70">
+                    {user ? "Upload notes or textbooks to get started" : "Check back soon for study materials"}
+                  </p>
+                </div>
               ) : (
                 filteredResources.map(resource => (
                   <ResourceItem
