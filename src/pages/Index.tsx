@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, Loader2 } from "lucide-react";
+import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, Loader2, MessageSquare } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
