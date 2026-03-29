@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import SubjectCard from "@/components/SubjectCard";
 import ResourceItem from "@/components/ResourceItem";
 import PortionAccordion from "@/components/PortionAccordion";
+import CommentsSection from "@/components/CommentsSection";
 import UploadDialog from "@/components/UploadDialog";
 import AuthorFooter from "@/components/AuthorFooter";
 import { subjects, classLevelOptions, type Resource } from "@/lib/data";
@@ -218,6 +219,14 @@ const Index = () => {
                 ))
               )}
             </div>
+
+            <CommentsSection
+              subject={selectedSubject}
+              classLevel={selectedClass}
+              subjectName={subjects.find(s => s.id === selectedSubject)?.name || ""}
+              className={classLevelOptions.find(c => c.value === selectedClass)?.label || ""}
+              isAdmin={!!user}
+            />
           </section>
         )}
       </main>

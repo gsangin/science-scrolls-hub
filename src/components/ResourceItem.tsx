@@ -1,6 +1,6 @@
 import { FileText, BookOpen, Calendar, Trash2, Pencil } from "lucide-react";
 import type { Resource } from "@/lib/data";
-import { classLevelOptions, physicsPortions } from "@/lib/data";
+import { classLevelOptions, physicsPortions, chemistryPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -49,7 +49,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated }: ResourceItemPr
               {resource.portion && (
                 <>
                   <span className="hidden sm:inline">•</span>
-                  <span className="hidden sm:inline">{physicsPortions.find(p => p.value === resource.portion)?.label || resource.portion}</span>
+                  <span className="hidden sm:inline">{[...physicsPortions, ...chemistryPortions].find(p => p.value === resource.portion)?.label || resource.portion}</span>
                 </>
               )}
               <span className="hidden sm:inline">•</span>

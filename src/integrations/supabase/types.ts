@@ -41,6 +41,33 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          author_name: string
+          class_level: string
+          created_at: string
+          id: string
+          message: string
+          subject: string
+        }
+        Insert: {
+          author_name?: string
+          class_level: string
+          created_at?: string
+          id?: string
+          message: string
+          subject: string
+        }
+        Update: {
+          author_name?: string
+          class_level?: string
+          created_at?: string
+          id?: string
+          message?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       resources: {
         Row: {
           class_level: string
