@@ -49,7 +49,7 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated }: ResourceItemPr
               {resource.portion && (
                 <>
                   <span className="hidden sm:inline">•</span>
-                  <span className="hidden sm:inline">{physicsPortions.find(p => p.value === resource.portion)?.label || resource.portion}</span>
+                  <span className="hidden sm:inline">{[...physicsPortions, ...chemistryPortions].find(p => p.value === resource.portion)?.label || resource.portion}</span>
                 </>
               )}
               <span className="hidden sm:inline">•</span>
