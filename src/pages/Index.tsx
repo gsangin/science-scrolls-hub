@@ -118,7 +118,10 @@ const Index = () => {
             <GraduationCap className="w-4 h-4" />
             Class 11 & 12 Science
           </div>
-          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+          <h1
+            className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight cursor-pointer"
+            onClick={() => { setSelectedSubject(null); setSelectedClass(null); setSearch(""); }}
+          >
             Science Scrolls
           </h1>
           <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-base sm:text-lg text-primary-foreground/80">
