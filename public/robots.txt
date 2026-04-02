@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://science-scrolls-hub.lovable.app/sitemap.xml
+Sitemap: https://sanginghimire.com.np/sitemap.xml
