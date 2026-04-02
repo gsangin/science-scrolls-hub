@@ -1,13 +1,20 @@
 import { useSearchParams } from "react-router-dom";
-import { ArrowLeft, Download, Loader2, ZoomIn, ZoomOut, Maximize, RotateCw, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, Download, Loader2, ZoomIn, ZoomOut, Maximize, ChevronUp, ChevronDown, Columns2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, memo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
-const LazyPage = ({ pageNumber, width, scale, rotation, onVisible }: { pageNumber: number; width: number; scale: number; rotation: number; onVisible: (page: number, isVisible: boolean) => void }) => {
+interface LazyPageProps {
+  pageNumber: number;
+  width: number;
+  scale: number;
+  onVisible: (page: number, isVisible: boolean) => void;
+}
+
+const LazyPage = memo(({ pageNumber, width, scale, onVisible }: LazyPageProps) => {
   const [isRendered, setIsRendered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -36,23 +43,44 @@ const LazyPage = ({ pageNumber, width, scale, rotation, onVisible }: { pageNumbe
           <Page
             pageNumber={pageNumber}
             width={renderWidth}
-            rotate={rotation}
             className="shadow-md bg-white"
             loading=""
             renderTextLayer={false}
             renderAnnotationLayer={false}
-            customTextRenderer={() => ""}
           />
           <div className="absolute inset-0 z-10 bg-transparent" />
         </div>
       ) : (
-        <div style={{ width: renderWidth }} className="flex items-center justify-center bg-card/50 shadow-md">
+        <div style={{ width: renderWidth }} className="flex items-center justify-center bg-card/50 shadow-md" role="status">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       )}
     </div>
   );
-};
+});
+
+LazyPage.displayName = "LazyPage";
+
+const SinglePageView = memo(({ pageNumber, width, scale }: { pageNumber: number; width: number; scale: number }) => {
+  const renderWidth = width * scale;
+  return (
+    <div className="flex justify-center" onContextMenu={(e) => e.preventDefault()}>
+      <div className="relative select-none" style={{ width: renderWidth }}>
+        <Page
+          pageNumber={pageNumber}
+          width={renderWidth}
+          className="shadow-md bg-white"
+          loading={<div style={{ width: renderWidth, height: renderWidth * 1.4 }} className="flex items-center justify-center bg-card/50 shadow-md"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>}
+          renderTextLayer={false}
+          renderAnnotationLayer={false}
+        />
+        <div className="absolute inset-0 z-10 bg-transparent" />
+      </div>
+    </div>
+  );
+});
+
+SinglePageView.displayName = "SinglePageView";
 
 const PdfViewer = () => {
   const [searchParams] = useSearchParams();
@@ -67,9 +95,10 @@ const PdfViewer = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(800);
   const [scale, setScale] = useState(1.0);
-  const [rotation, setRotation] = useState(0);
   const [visiblePages, setVisiblePages] = useState<Set<number>>(new Set());
   const [pageInput, setPageInput] = useState("1");
+  const [singlePageMode, setSinglePageMode] = useState(false);
+  const [singlePage, setSinglePage] = useState(1);
 
   const handlePageVisibility = useCallback((page: number, isVisible: boolean) => {
     setVisiblePages(prev => {
@@ -80,9 +109,8 @@ const PdfViewer = () => {
     });
   }, []);
 
-  const currentPage = visiblePages.size > 0 ? Math.min(...Array.from(visiblePages)) : 1;
+  const currentPage = singlePageMode ? singlePage : (visiblePages.size > 0 ? Math.min(...Array.from(visiblePages)) : 1);
 
-  // Sync input with current visible page
   useEffect(() => {
     setPageInput(String(currentPage));
   }, [currentPage]);
@@ -94,8 +122,12 @@ const PdfViewer = () => {
 
   const goToPage = (page: number) => {
     const p = Math.max(1, Math.min(page, numPages));
+    if (singlePageMode) {
+      setSinglePage(p);
+    } else {
+      scrollToPage(p);
+    }
     setPageInput(String(p));
-    scrollToPage(p);
   };
 
   const handlePageInputSubmit = (e: React.FormEvent | React.FocusEvent) => {
@@ -106,20 +138,18 @@ const PdfViewer = () => {
   };
 
   const zoomIn = () => setScale(s => Math.min(s + 0.2, 3.0));
-  const zoomOut = () => setScale(s => Math.max(s - 0.2, 0.5));
+  const zoomOut = () => setScale(s => Math.max(s - 0.2, 0.4));
   const fitToWidth = () => setScale(1.0);
-  const rotateDoc = () => setRotation(r => (r + 90) % 360);
+
+  const toggleViewMode = () => {
+    if (!singlePageMode) {
+      setSinglePage(currentPage);
+    }
+    setSinglePageMode(prev => !prev);
+  };
 
   const handleDownload = () => {
-    if (!pdfData) {
-      const link = document.createElement("a");
-      link.href = url!.includes("?") ? `${url}&download=` : `${url}?download=`;
-      link.download = `${title}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      return;
-    }
+    if (!pdfData) return;
     const blobUrl = URL.createObjectURL(pdfData);
     const link = document.createElement("a");
     link.href = blobUrl;
@@ -137,6 +167,7 @@ const PdfViewer = () => {
 
   const onDocumentLoadError = useCallback(() => {
     setError(true);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -172,14 +203,13 @@ const PdfViewer = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Header toolbar */}
       <header className="flex flex-col sm:flex-row items-center gap-2 border-b border-border px-3 py-2 sticky top-0 bg-background z-10">
         <div className="flex items-center w-full sm:w-auto flex-1 gap-2 min-w-0">
           <Button variant="ghost" size="icon" className="shrink-0" onClick={() => window.close()}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="font-heading text-base font-semibold text-foreground truncate">
-            {title}
-          </h1>
+          <h1 className="font-heading text-base font-semibold text-foreground truncate">{title}</h1>
         </div>
 
         {numPages > 0 && !error && (
@@ -204,7 +234,7 @@ const PdfViewer = () => {
             <div className="w-px h-4 bg-border mx-0.5" />
 
             {/* Zoom */}
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} disabled={scale <= 0.5}>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} disabled={scale <= 0.4}>
               <ZoomOut className="w-3.5 h-3.5" />
             </Button>
             <span className="text-xs font-semibold w-10 text-center select-none">{Math.round(scale * 100)}%</span>
@@ -214,19 +244,27 @@ const PdfViewer = () => {
 
             <div className="w-px h-4 bg-border mx-0.5" />
 
-            {/* Fit & Rotate */}
+            {/* Fit to width */}
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={fitToWidth} title="Fit to width">
               <Maximize className="w-3.5 h-3.5" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={rotateDoc} title="Rotate 90°">
-              <RotateCw className="w-3.5 h-3.5" />
+
+            {/* View mode toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-7 w-7 ${singlePageMode ? "bg-primary/10 text-primary" : ""}`}
+              onClick={toggleViewMode}
+              title={singlePageMode ? "Continuous scroll" : "Single page view"}
+            >
+              {singlePageMode ? <Columns2 className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
             </Button>
           </div>
         )}
 
         <div className="flex items-center justify-end w-full sm:w-auto flex-1">
           {downloadable && (
-            <Button variant="outline" size="sm" onClick={handleDownload} disabled={!pdfData && loading}>
+            <Button variant="outline" size="sm" onClick={handleDownload} disabled={!pdfData}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
@@ -234,6 +272,7 @@ const PdfViewer = () => {
         </div>
       </header>
 
+      {/* Content */}
       <div ref={measuredRef} className="flex-1 overflow-auto flex justify-center bg-muted/30 p-2 sm:p-4">
         {loading && !error && (
           <div className="flex items-center justify-center py-20">
@@ -255,9 +294,13 @@ const PdfViewer = () => {
             className={`flex flex-col items-center gap-2 ${loading || error ? "hidden" : ""}`}
             onContextMenu={(e) => e.preventDefault()}
           >
-            {Array.from({ length: numPages }, (_, i) => (
-              <LazyPage key={i} pageNumber={i + 1} width={pageWidth} scale={scale} rotation={rotation} onVisible={handlePageVisibility} />
-            ))}
+            {singlePageMode ? (
+              <SinglePageView pageNumber={singlePage} width={pageWidth} scale={scale} />
+            ) : (
+              Array.from({ length: numPages }, (_, i) => (
+                <LazyPage key={i} pageNumber={i + 1} width={pageWidth} scale={scale} onVisible={handlePageVisibility} />
+              ))
+            )}
           </Document>
         )}
       </div>
