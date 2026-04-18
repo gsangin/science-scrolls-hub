@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, Loader2, MessageSquare } from "lucide-react";
+import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, MessageSquare } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,7 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: resources = [], isLoading } = useQuery({
+  const { data: resources = [] } = useQuery({
     queryKey: ['resources'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -40,7 +40,8 @@ const Index = () => {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data as Resource[]) || [];
-    }
+    },
+    retry: 1,
   });
 
   const subjectsWithCounts = useMemo(() => {
@@ -140,7 +141,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10 cv-auto">
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10">
         {/* Subject Grid */}
         <section>
           <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground mb-4 sm:mb-5">Subjects</h2>
