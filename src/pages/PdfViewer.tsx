@@ -86,9 +86,10 @@ SinglePageView.displayName = "SinglePageView";
 const PdfViewer = () => {
   const [searchParams] = useSearchParams();
   const filePath = searchParams.get("file_path");
-  const title = searchParams.get("title") || "Document";
-  const downloadable = searchParams.get("downloadable") === "1";
-
+  
+  const [title, setTitle] = useState(searchParams.get("title") || "Document");
+  const [downloadable, setDownloadable] = useState(false);
+  
   const [numPages, setNumPages] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -100,6 +101,25 @@ const PdfViewer = () => {
   const [pageInput, setPageInput] = useState("1");
   const [singlePageMode, setSinglePageMode] = useState(false);
   const [singlePage, setSinglePage] = useState(1);
+
+  // Securely fetch the true downloadable status from the database to prevent URL spoofing
+  useEffect(() => {
+    if (!filePath) return;
+    const fetchMetadata = async () => {
+      const { data, error } = await supabase
+        .from("resources")
+        .select("downloadable, title")
+        .eq("file_path", filePath)
+        .single();
+        
+      if (!error && data) {
+        setDownloadable(data.downloadable);
+        if (data.title) setTitle(data.title);
+      }
+    };
+    
+    fetchMetadata();
+  }, [filePath]);
 
   const handlePageVisibility = useCallback((page: number, isVisible: boolean) => {
     setVisiblePages(prev => {
