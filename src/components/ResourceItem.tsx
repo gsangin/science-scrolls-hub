@@ -3,8 +3,9 @@ import type { Resource } from "@/lib/data";
 import { classLevelOptions, physicsPortions, chemistryPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
-import EditResourceDialog from "@/components/EditResourceDialog";
+import { useState, lazy, Suspense } from "react";
+
+const EditResourceDialog = lazy(() => import("@/components/EditResourceDialog"));
 
 interface ResourceItemProps {
   resource: Resource;
@@ -72,13 +73,15 @@ const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated }: ResourceItemPr
         </div>
       </div>
 
-      {isAdmin && (
-        <EditResourceDialog
-          open={editOpen}
-          onClose={() => setEditOpen(false)}
-          resource={resource}
-          onUpdated={onUpdated || (() => {})}
-        />
+      {isAdmin && editOpen && (
+        <Suspense fallback={null}>
+          <EditResourceDialog
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            resource={resource}
+            onUpdated={onUpdated || (() => {})}
+          />
+        </Suspense>
       )}
     </>
   );

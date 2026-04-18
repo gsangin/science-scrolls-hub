@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, Loader2, MessageSquare } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,14 @@ import SubjectCard from "@/components/SubjectCard";
 import ResourceItem from "@/components/ResourceItem";
 import PortionAccordion from "@/components/PortionAccordion";
 import CommentsSection from "@/components/CommentsSection";
-import UploadDialog from "@/components/UploadDialog";
 import AuthorFooter from "@/components/AuthorFooter";
 import { subjects, classLevelOptions, type Resource } from "@/lib/data";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+
+const UploadDialog = lazy(() => import("@/components/UploadDialog"));
 
 const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -250,12 +251,14 @@ const Index = () => {
 
       <AuthorFooter />
 
-      {user && (
-        <UploadDialog
-          open={uploadOpen}
-          onClose={() => setUploadOpen(false)}
-          onUploaded={handleUpdate}
-        />
+      {user && uploadOpen && (
+        <Suspense fallback={null}>
+          <UploadDialog
+            open={uploadOpen}
+            onClose={() => setUploadOpen(false)}
+            onUploaded={handleUpdate}
+          />
+        </Suspense>
       )}
     </div>
   );
