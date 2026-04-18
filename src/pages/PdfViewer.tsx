@@ -171,36 +171,17 @@ const PdfViewer = () => {
     setLoading(false);
   }, []);
 
-  // Fetch signed URL from edge function, then fetch the PDF blob
+  // Fetch the PDF blob using the public URL
   useEffect(() => {
     if (!filePath) return;
     const abortCtrl = new AbortController();
 
     (async () => {
       try {
-        let urlToFetch = "";
-
-        try {
-          // Call edge function to get a short-lived signed URL
-          const { data, error: fnError } = await supabase.functions.invoke("get-signed-url", {
-            body: { file_path: filePath },
-          });
-
-          if (fnError || !data?.signedUrl) {
-            console.warn("Edge function error. Falling back to public URL.", fnError);
-            const { data: publicData } = supabase.storage.from("study-materials").getPublicUrl(filePath);
-            urlToFetch = publicData.publicUrl;
-          } else {
-            urlToFetch = data.signedUrl;
-          }
-        } catch (invokeErr) {
-          console.warn("Failed to invoke Edge Function. Falling back to public URL.", invokeErr);
-          const { data: publicData } = supabase.storage.from("study-materials").getPublicUrl(filePath);
-          urlToFetch = publicData.publicUrl;
-        }
-
-        // Fetch the PDF blob using the resolved URL
-        const res = await fetch(urlToFetch, {
+        const { data } = supabase.storage.from("study-materials").getPublicUrl(filePath);
+        
+        // Fetch the PDF blob using the public URL to pass to react-pdf
+        const res = await fetch(data.publicUrl, {
           signal: abortCtrl.signal,
           headers: { Accept: "application/pdf, application/octet-stream" },
         });
