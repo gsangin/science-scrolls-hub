@@ -21,7 +21,7 @@ const Index = () => {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -102,12 +102,20 @@ const Index = () => {
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent/40" />
           <div className="absolute -bottom-10 -left-10 h-60 w-60 rounded-full bg-accent/20" />
         </div>
-        {user && (
+        {isAdmin && (
           <div className="absolute top-4 sm:top-6 left-4 sm:left-6 right-4 sm:right-6 flex items-center justify-between">
             <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/admin-settings")}>
               <Settings className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Settings</span>
             </Button>
+            <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={signOut}>
+              <LogOut className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Logout</span>
+            </Button>
+          </div>
+        )}
+        {user && !isAdmin && (
+          <div className="absolute top-4 sm:top-6 right-4 sm:right-6">
             <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={signOut}>
               <LogOut className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Logout</span>
@@ -128,7 +136,7 @@ const Index = () => {
           <p className="mx-auto mt-3 sm:mt-4 max-w-xl text-base sm:text-lg text-primary-foreground/80">
             Your Science Companion
           </p>
-          {user && (
+          {isAdmin && (
             <Button size="lg" onClick={() => setUploadOpen(true)} className="mt-6 sm:mt-8 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-lg">
               <Upload className="w-5 h-5 mr-2" />
               Upload Resource
@@ -199,7 +207,7 @@ const Index = () => {
                 <PortionAccordion
                   resources={filteredResources}
                   subject={selectedSubject!}
-                  isAdmin={!!user}
+                  isAdmin={isAdmin}
                   onDelete={handleDelete}
                   onUpdated={handleUpdate}
                 />
@@ -208,7 +216,7 @@ const Index = () => {
                   <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground/50 mb-3 sm:mb-4" />
                   <p className="text-base sm:text-lg font-heading font-semibold text-muted-foreground">No resources yet</p>
                   <p className="mt-1 text-xs sm:text-sm text-muted-foreground/70">
-                    {user ? "Upload notes or textbooks to get started" : "Check back soon for study materials"}
+                    {isAdmin ? "Upload notes or textbooks to get started" : "Check back soon for study materials"}
                   </p>
                 </div>
               ) : (
@@ -216,7 +224,7 @@ const Index = () => {
                   <ResourceItem
                     key={resource.id}
                     resource={resource}
-                    isAdmin={!!user}
+                    isAdmin={isAdmin}
                     onDelete={handleDelete}
                     onUpdated={handleUpdate}
                   />
@@ -229,7 +237,7 @@ const Index = () => {
               classLevel={selectedClass}
               subjectName={subjects.find(s => s.id === selectedSubject)?.name || ""}
               className={classLevelOptions.find(c => c.value === selectedClass)?.label || ""}
-              isAdmin={!!user}
+              isAdmin={isAdmin}
             />
           </section>
         )}
@@ -251,7 +259,7 @@ const Index = () => {
 
       <AuthorFooter />
 
-      {user && uploadOpen && (
+      {isAdmin && uploadOpen && (
         <Suspense fallback={null}>
           <UploadDialog
             open={uploadOpen}
