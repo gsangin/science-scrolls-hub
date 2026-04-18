@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, Loader2, MessageSquare } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,12 @@ const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 150);
+    return () => clearTimeout(t);
+  }, [search]);
   const [uploadOpen, setUploadOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -50,13 +56,14 @@ const Index = () => {
 
   const filteredResources = useMemo(() => {
     if (!selectedSubject || !selectedClass) return [];
+    const q = debouncedSearch.toLowerCase();
     return resources.filter(r => {
       if (r.subject !== selectedSubject) return false;
       if (r.class_level !== selectedClass) return false;
-      if (search && !r.title.toLowerCase().includes(search.toLowerCase())) return false;
+      if (q && !r.title.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [resources, selectedSubject, selectedClass, search]);
+  }, [resources, selectedSubject, selectedClass, debouncedSearch]);
 
   const handleSubjectClick = useCallback((subjectId: string) => {
     setSelectedSubject(prev => {
