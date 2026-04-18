@@ -178,17 +178,29 @@ const PdfViewer = () => {
 
     (async () => {
       try {
-        // Call edge function to get a short-lived signed URL
-        const { data, error: fnError } = await supabase.functions.invoke("get-signed-url", {
-          body: { file_path: filePath },
-        });
+        let urlToFetch = "";
 
-        if (fnError || !data?.signedUrl) {
-          throw new Error(fnError?.message || "Failed to get signed URL");
+        try {
+          // Call edge function to get a short-lived signed URL
+          const { data, error: fnError } = await supabase.functions.invoke("get-signed-url", {
+            body: { file_path: filePath },
+          });
+
+          if (fnError || !data?.signedUrl) {
+            console.warn("Edge function error (likely not deployed yet). Falling back to public URL.");
+            const { data: publicData } = supabase.storage.from("study-materials").getPublicUrl(filePath);
+            urlToFetch = publicData.publicUrl;
+          } else {
+            urlToFetch = data.signedUrl;
+          }
+        } catch (invokeErr) {
+          console.warn("Failed to invoke Edge Function. Falling back to public URL.", invokeErr);
+          const { data: publicData } = supabase.storage.from("study-materials").getPublicUrl(filePath);
+          urlToFetch = publicData.publicUrl;
         }
 
-        // Fetch the PDF blob using the signed URL
-        const res = await fetch(data.signedUrl, {
+        // Fetch the PDF blob using the resolved URL
+        const res = await fetch(urlToFetch, {
           signal: abortCtrl.signal,
           headers: { Accept: "application/pdf, application/octet-stream" },
         });
