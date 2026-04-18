@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,47 +9,40 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-interface AuthorSettingsData {
-  id: string;
-  name: string;
-  description: string | null;
-  photo_url: string | null;
-  show_photo: boolean;
-}
 
 const AdminSettings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const { data: settings } = useQuery<AuthorSettingsData | null>({
-    queryKey: ["author_settings"],
-    queryFn: async () => {
-      const { data, error } = await supabase
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [showPhoto, setShowPhoto] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [settingsId, setSettingsId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    const fetch = async () => {
+      const { data } = await supabase
         .from("author_settings")
         .select("*")
         .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return (data as AuthorSettingsData) ?? null;
-    },
-    enabled: !!user,
-  });
-
-  const [name, setName] = useState(() => settings?.name ?? "");
-  const [description, setDescription] = useState(() => settings?.description ?? "");
-  const [photoUrl, setPhotoUrl] = useState<string | null>(() => settings?.photo_url ?? null);
-  const [showPhoto, setShowPhoto] = useState(() => settings?.show_photo ?? false);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-
-  // Sync local form state when server data arrives
-  const settingsId = settings?.id ?? null;
-  const resolvedName = name || settings?.name || "";
-  const resolvedDesc = description || settings?.description || "";
+        .single();
+      if (data) {
+        setSettingsId(data.id);
+        setName(data.name);
+        setDescription(data.description || "");
+        setPhotoUrl(data.photo_url || null);
+        setShowPhoto(data.show_photo);
+      }
+    };
+    fetch();
+  }, [user, navigate]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,7 +54,9 @@ const AdminSettings = () => {
         .from("author-photos")
         .upload(filePath, file, { upsert: true });
       if (error) throw error;
-      const { data: urlData } = supabase.storage.from("author-photos").getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage
+        .from("author-photos")
+        .getPublicUrl(filePath);
       setPhotoUrl(urlData.publicUrl);
       toast({ title: "Photo uploaded" });
     } catch (err: unknown) {
@@ -78,23 +73,20 @@ const AdminSettings = () => {
   };
 
   const handleSave = async () => {
+    if (!settingsId) return;
     setSaving(true);
     try {
-      const payload = {
-        name: resolvedName,
-        description: resolvedDesc,
-        photo_url: photoUrl,
-        show_photo: showPhoto,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = settingsId
-        ? await supabase.from("author_settings").update(payload).eq("id", settingsId)
-        : await supabase.from("author_settings").insert(payload);
-
+      const { error } = await supabase
+        .from("author_settings")
+        .update({
+          name,
+          description,
+          photo_url: photoUrl,
+          show_photo: showPhoto,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", settingsId);
       if (error) throw error;
-      // Invalidate so AuthorFooter picks up the change
-      queryClient.invalidateQueries({ queryKey: ["author_settings"] });
       toast({ title: "Settings saved!" });
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : "An unknown error occurred";
@@ -122,7 +114,7 @@ const AdminSettings = () => {
           <Label htmlFor="authorName">Author Name</Label>
           <Input
             id="authorName"
-            value={resolvedName}
+            value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Author name"
           />
@@ -132,7 +124,7 @@ const AdminSettings = () => {
           <Label htmlFor="authorDesc">Description</Label>
           <Textarea
             id="authorDesc"
-            value={resolvedDesc}
+            value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Write a short bio..."
             rows={4}
@@ -158,8 +150,6 @@ const AdminSettings = () => {
                 src={photoUrl}
                 alt="Author"
                 className="w-20 h-20 rounded-full object-cover border-2 border-border"
-                loading="lazy"
-                decoding="async"
               />
               <Button variant="outline" size="sm" onClick={handleRemovePhoto}>
                 <Trash2 className="w-4 h-4 mr-1" />

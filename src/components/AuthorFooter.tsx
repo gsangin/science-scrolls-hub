@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AuthorSettings {
@@ -9,20 +9,19 @@ interface AuthorSettings {
 }
 
 const AuthorFooter = () => {
-  const { data: author } = useQuery<AuthorSettings | null>({
-    queryKey: ["author_settings"],
-    queryFn: async () => {
-      const { data, error } = await supabase
+  const [author, setAuthor] = useState<AuthorSettings | null>(null);
+
+  useEffect(() => {
+    const fetchAuthor = async () => {
+      const { data } = await supabase
         .from("author_settings")
-        .select("name, description, photo_url, show_photo")
+        .select("*")
         .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return (data as AuthorSettings) ?? null;
-    },
-    staleTime: 10 * 60 * 1000, // author data rarely changes
-    retry: 1,
-  });
+        .single();
+      if (data) setAuthor(data as AuthorSettings);
+    };
+    fetchAuthor();
+  }, []);
 
   if (!author) return null;
 
@@ -35,8 +34,6 @@ const AuthorFooter = () => {
               src={author.photo_url}
               alt={author.name}
               className="w-16 h-16 rounded-full object-cover shrink-0 border-2 border-border"
-              loading="lazy"
-              decoding="async"
             />
           )}
           <div className="text-left">

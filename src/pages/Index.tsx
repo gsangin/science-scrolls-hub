@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, MessageSquare } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, Loader2, MessageSquare } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,19 +19,13 @@ const Index = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 150);
-    return () => clearTimeout(t);
-  }, [search]);
   const [uploadOpen, setUploadOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: resources = [] } = useQuery({
+  const { data: resources = [], isLoading } = useQuery({
     queryKey: ['resources'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -40,8 +34,7 @@ const Index = () => {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data as Resource[]) || [];
-    },
-    retry: 1,
+    }
   });
 
   const subjectsWithCounts = useMemo(() => {
@@ -57,25 +50,23 @@ const Index = () => {
 
   const filteredResources = useMemo(() => {
     if (!selectedSubject || !selectedClass) return [];
-    const q = debouncedSearch.toLowerCase();
     return resources.filter(r => {
       if (r.subject !== selectedSubject) return false;
       if (r.class_level !== selectedClass) return false;
-      if (q && !r.title.toLowerCase().includes(q)) return false;
+      if (search && !r.title.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [resources, selectedSubject, selectedClass, debouncedSearch]);
+  }, [resources, selectedSubject, selectedClass, search]);
 
-  const handleSubjectClick = useCallback((subjectId: string) => {
-    setSelectedSubject(prev => {
-      if (prev === subjectId) {
-        setSelectedClass(null);
-        return null;
-      }
+  const handleSubjectClick = (subjectId: string) => {
+    if (selectedSubject === subjectId) {
+      setSelectedSubject(null);
       setSelectedClass(null);
-      return subjectId;
-    });
-  }, []);
+    } else {
+      setSelectedSubject(subjectId);
+      setSelectedClass(null);
+    }
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -95,17 +86,21 @@ const Index = () => {
     }
   });
 
-  const handleDelete = useCallback((id: string) => {
+  const handleDelete = (id: string) => {
     deleteMutation.mutate(id);
-  }, [deleteMutation]);
+  };
 
-  const handleUpdate = useCallback(() => {
+  const handleUpdate = () => {
     queryClient.invalidateQueries({ queryKey: ['resources'] });
-  }, [queryClient]);
+  };
 
   return (
     <div className="min-h-screen">
-      <header className="relative bg-primary px-4 sm:px-6 py-10 sm:py-16 text-primary-foreground">
+      <header className="relative overflow-hidden bg-primary px-4 sm:px-6 py-10 sm:py-16 text-primary-foreground">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent/40" />
+          <div className="absolute -bottom-10 -left-10 h-60 w-60 rounded-full bg-accent/20" />
+        </div>
         {user && (
           <div className="absolute top-4 sm:top-6 left-4 sm:left-6 right-4 sm:right-6 flex items-center justify-between">
             <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/admin-settings")}>
@@ -168,7 +163,7 @@ const Index = () => {
                 <button
                   key={opt.value}
                   onClick={() => setSelectedClass(prev => prev === opt.value ? null : opt.value)}
-                  className={`rounded-xl border p-4 sm:p-5 text-center font-heading font-semibold text-sm sm:text-base transition-shadow duration-200 hover:shadow-md ${
+                  className={`rounded-xl border p-4 sm:p-5 text-center font-heading font-semibold text-sm sm:text-base transition-all duration-200 hover:shadow-md ${
                     selectedClass === opt.value
                       ? "border-primary bg-primary/5 shadow-sm text-primary"
                       : "border-border bg-card text-card-foreground hover:border-primary/30"

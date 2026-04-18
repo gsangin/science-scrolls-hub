@@ -1,9 +1,9 @@
-import { memo, useMemo, useState } from "react";
 import { FileText, BookOpen, Calendar, Trash2, Pencil } from "lucide-react";
 import type { Resource } from "@/lib/data";
 import { classLevelOptions, physicsPortions, chemistryPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import EditResourceDialog from "@/components/EditResourceDialog";
 
 interface ResourceItemProps {
@@ -13,50 +13,31 @@ interface ResourceItemProps {
   onUpdated?: () => void;
 }
 
-// Pre-combine once at module level — never re-created
-const allPortions = [...physicsPortions, ...chemistryPortions];
-
-const ResourceItem = memo(({ resource, isAdmin, onDelete, onUpdated }: ResourceItemProps) => {
+const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated }: ResourceItemProps) => {
   const [editOpen, setEditOpen] = useState(false);
 
-  // Only recomputed when file_path changes
-  const publicUrl = useMemo(
-    () => supabase.storage.from("study-materials").getPublicUrl(resource.file_path).data.publicUrl,
-    [resource.file_path]
-  );
+  const publicUrl = supabase.storage
+    .from("study-materials")
+    .getPublicUrl(resource.file_path).data.publicUrl;
 
-  const viewerUrl = useMemo(
-    () => `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`,
-    [publicUrl, resource.title, resource.downloadable]
-  );
+  const viewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
 
-  const classLabel = useMemo(
-    () => classLevelOptions.find(o => o.value === resource.class_level)?.label ?? `Class ${resource.class_level}`,
-    [resource.class_level]
-  );
-
-  const portionLabel = useMemo(
-    () => resource.portion ? (allPortions.find(p => p.value === resource.portion)?.label ?? resource.portion) : null,
-    [resource.portion]
-  );
-
-  const formattedDate = useMemo(
-    () => new Date(resource.created_at).toLocaleDateString(),
-    [resource.created_at]
-  );
-
-  const isNotes = resource.type === "notes";
+  const handleOpen = () => {
+    window.open(viewerUrl, "_blank");
+  };
 
   return (
     <>
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="group flex items-center gap-3 sm:gap-4 p-3 sm:p-4 transition-all duration-200 hover:shadow-[var(--shadow-card)]">
-          <div className={`flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg ${isNotes ? "bg-primary/10 text-primary" : "bg-accent/15 text-accent"}`}>
-            {isNotes ? <FileText className="w-4 h-4 sm:w-5 sm:h-5" /> : <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />}
+          <div className={`flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg ${
+            resource.type === "notes" ? "bg-primary/10 text-primary" : "bg-accent/15 text-accent"
+          }`}>
+            {resource.type === "notes" ? <FileText className="w-4 h-4 sm:w-5 sm:h-5" /> : <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />}
           </div>
           <div className="flex-1 min-w-0">
             <button
-              onClick={() => window.open(viewerUrl, "_blank")}
+              onClick={handleOpen}
               className="font-heading font-semibold text-sm sm:text-base text-card-foreground truncate block hover:text-primary hover:underline transition-colors text-left max-w-full"
             >
               {resource.title}
@@ -64,17 +45,17 @@ const ResourceItem = memo(({ resource, isAdmin, onDelete, onUpdated }: ResourceI
             <div className="mt-0.5 sm:mt-1 flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground flex-wrap">
               <span className="capitalize">{resource.type}</span>
               <span>•</span>
-              <span>{classLabel}</span>
-              {portionLabel && (
+              <span>{classLevelOptions.find(o => o.value === resource.class_level)?.label || `Class ${resource.class_level}`}</span>
+              {resource.portion && (
                 <>
                   <span className="hidden sm:inline">•</span>
-                  <span className="hidden sm:inline">{portionLabel}</span>
+                  <span className="hidden sm:inline">{[...physicsPortions, ...chemistryPortions].find(p => p.value === resource.portion)?.label || resource.portion}</span>
                 </>
               )}
               <span className="hidden sm:inline">•</span>
               <span className="hidden sm:inline-flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
-                {formattedDate}
+                {new Date(resource.created_at).toLocaleDateString()}
               </span>
             </div>
           </div>
@@ -96,13 +77,11 @@ const ResourceItem = memo(({ resource, isAdmin, onDelete, onUpdated }: ResourceI
           open={editOpen}
           onClose={() => setEditOpen(false)}
           resource={resource}
-          onUpdated={onUpdated ?? (() => {})}
+          onUpdated={onUpdated || (() => {})}
         />
       )}
     </>
   );
-});
-
-ResourceItem.displayName = "ResourceItem";
+};
 
 export default ResourceItem;

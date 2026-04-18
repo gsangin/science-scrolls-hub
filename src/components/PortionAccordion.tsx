@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react";
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { physicsPortions, chemistryPortions, type Resource } from "@/lib/data";
 import ResourceItem from "@/components/ResourceItem";
@@ -11,7 +11,7 @@ interface PortionAccordionProps {
   onUpdated?: () => void;
 }
 
-const PortionAccordion = memo(({ resources, subject, isAdmin, onDelete, onUpdated }: PortionAccordionProps) => {
+const PortionAccordion = ({ resources, subject, isAdmin, onDelete, onUpdated }: PortionAccordionProps) => {
   const [openPortions, setOpenPortions] = useState<string[]>([]);
 
   const togglePortion = (portion: string) => {
@@ -22,18 +22,12 @@ const PortionAccordion = memo(({ resources, subject, isAdmin, onDelete, onUpdate
 
   const targetPortions = subject === "physics" ? physicsPortions : chemistryPortions;
 
-  const portionsWithResources = useMemo(() =>
-    targetPortions.map(p => ({
-      ...p,
-      resources: resources.filter(r => r.portion === p.value),
-    })),
-    [resources, targetPortions]
-  );
+  const portionsWithResources = targetPortions.map(p => ({
+    ...p,
+    resources: resources.filter(r => r.portion === p.value),
+  }));
 
-  const untagged = useMemo(() =>
-    resources.filter(r => !r.portion),
-    [resources]
-  );
+  const untagged = resources.filter(r => !r.portion);
 
   return (
     <div className="space-y-2">
@@ -58,31 +52,28 @@ const PortionAccordion = memo(({ resources, subject, isAdmin, onDelete, onUpdate
               />
             </button>
             <div
-              className="grid"
+              className="overflow-hidden transition-all duration-300 ease-in-out"
               style={{
-                gridTemplateRows: isOpen ? "1fr" : "0fr",
+                maxHeight: isOpen ? `${portion.resources.length * 200 + 20}px` : "0px",
                 opacity: isOpen ? 1 : 0,
-                transition: "grid-template-rows 250ms ease, opacity 200ms ease",
               }}
             >
-              <div className="overflow-hidden">
-                <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2">
-                  {portion.resources.length === 0 ? (
-                    <p className="text-xs sm:text-sm text-muted-foreground py-3 text-center">
-                      No resources in this portion yet
-                    </p>
-                  ) : (
-                    portion.resources.map(resource => (
-                      <ResourceItem
-                        key={resource.id}
-                        resource={resource}
-                        isAdmin={isAdmin}
-                        onDelete={onDelete}
-                        onUpdated={onUpdated}
-                      />
-                    ))
-                  )}
-                </div>
+              <div className="px-2 sm:px-3 pb-2 sm:pb-3 space-y-2">
+                {portion.resources.length === 0 ? (
+                  <p className="text-xs sm:text-sm text-muted-foreground py-3 text-center">
+                    No resources in this portion yet
+                  </p>
+                ) : (
+                  portion.resources.map(resource => (
+                    <ResourceItem
+                      key={resource.id}
+                      resource={resource}
+                      isAdmin={isAdmin}
+                      onDelete={onDelete}
+                      onUpdated={onUpdated}
+                    />
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -104,8 +95,6 @@ const PortionAccordion = memo(({ resources, subject, isAdmin, onDelete, onUpdate
       )}
     </div>
   );
-});
-
-PortionAccordion.displayName = "PortionAccordion";
+};
 
 export default PortionAccordion;
