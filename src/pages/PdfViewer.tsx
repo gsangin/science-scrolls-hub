@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useCallback, useRef, useEffect, memo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import { supabase } from "@/integrations/supabase/client";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
@@ -84,7 +85,7 @@ SinglePageView.displayName = "SinglePageView";
 
 const PdfViewer = () => {
   const [searchParams] = useSearchParams();
-  const url = searchParams.get("url");
+  const filePath = searchParams.get("file_path");
   const title = searchParams.get("title") || "Document";
   const downloadable = searchParams.get("downloadable") === "1";
 
@@ -170,15 +171,41 @@ const PdfViewer = () => {
     setLoading(false);
   }, []);
 
+  // Fetch signed URL from edge function, then fetch the PDF blob
   useEffect(() => {
-    if (!url) return;
+    if (!filePath) return;
     const abortCtrl = new AbortController();
-    fetch(url, { signal: abortCtrl.signal, headers: { 'Accept': 'application/pdf, application/octet-stream' } })
-      .then(res => { if (!res.ok) throw new Error("Failed"); return res.blob(); })
-      .then(blob => setPdfData(blob))
-      .catch(err => { if (err.name !== "AbortError") { console.error(err); setError(true); setLoading(false); } });
+
+    (async () => {
+      try {
+        // Call edge function to get a short-lived signed URL
+        const { data, error: fnError } = await supabase.functions.invoke("get-signed-url", {
+          body: { file_path: filePath },
+        });
+
+        if (fnError || !data?.signedUrl) {
+          throw new Error(fnError?.message || "Failed to get signed URL");
+        }
+
+        // Fetch the PDF blob using the signed URL
+        const res = await fetch(data.signedUrl, {
+          signal: abortCtrl.signal,
+          headers: { Accept: "application/pdf, application/octet-stream" },
+        });
+        if (!res.ok) throw new Error("Failed to fetch PDF");
+        const blob = await res.blob();
+        setPdfData(blob);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.error(err);
+          setError(true);
+          setLoading(false);
+        }
+      }
+    })();
+
     return () => abortCtrl.abort();
-  }, [url]);
+  }, [filePath]);
 
   const measuredRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
@@ -191,10 +218,10 @@ const PdfViewer = () => {
     }
   }, []);
 
-  if (!url) {
+  if (!filePath) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">No document URL provided.</p>
+        <p className="text-muted-foreground">No document specified.</p>
       </div>
     );
   }

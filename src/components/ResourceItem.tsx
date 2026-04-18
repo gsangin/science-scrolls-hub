@@ -2,7 +2,6 @@ import { FileText, BookOpen, Calendar, Trash2, Pencil } from "lucide-react";
 import type { Resource } from "@/lib/data";
 import { classLevelOptions, physicsPortions, chemistryPortions } from "@/lib/data";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { useState, lazy, Suspense } from "react";
 
 const EditResourceDialog = lazy(() => import("@/components/EditResourceDialog"));
@@ -17,15 +16,12 @@ interface ResourceItemProps {
 const ResourceItem = ({ resource, isAdmin, onDelete, onUpdated }: ResourceItemProps) => {
   const [editOpen, setEditOpen] = useState(false);
 
-  const publicUrl = supabase.storage
-    .from("study-materials")
-    .getPublicUrl(resource.file_path).data.publicUrl;
-
-  const viewerUrl = `/view?url=${encodeURIComponent(publicUrl)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
+  const viewerUrl = `/view?file_path=${encodeURIComponent(resource.file_path)}&title=${encodeURIComponent(resource.title)}&downloadable=${resource.downloadable ? "1" : "0"}`;
 
   const handleOpen = () => {
     window.open(viewerUrl, "_blank");
   };
+
 
   return (
     <>

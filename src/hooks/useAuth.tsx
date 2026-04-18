@@ -13,6 +13,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/** Read admin role directly from the JWT app_metadata claim.
+ *  No DB roundtrip needed — the custom_access_token_hook injects it. */
+const isAdminFromSession = (session: Session | null): boolean => {
+  if (!session?.user) return false;
+  const role = session.user.app_metadata?.app_role;
+  return role === "admin";
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -20,37 +28,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const checkAdmin = async (userId: string | undefined) => {
-      if (!userId) {
-        setIsAdmin(false);
-        return;
-      }
-      // Defer Supabase call to avoid deadlock inside auth state callback
-      setTimeout(async () => {
-        const { data } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId)
-          .eq("role", "admin")
-          .maybeSingle();
-        setIsAdmin(!!data);
-      }, 0);
-    };
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        setIsAdmin(isAdminFromSession(session));
         setLoading(false);
-        checkAdmin(session?.user?.id);
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setIsAdmin(isAdminFromSession(session));
       setLoading(false);
-      checkAdmin(session?.user?.id);
     });
 
     return () => subscription.unsubscribe();
