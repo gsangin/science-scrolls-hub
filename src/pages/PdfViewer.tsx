@@ -43,7 +43,8 @@ const LazyPage = memo(({ pageNumber, width, scale, onVisible }: LazyPageProps) =
         <div className="relative select-none" style={{ width: renderWidth }} onContextMenu={(e) => e.preventDefault()}>
           <Page
             pageNumber={pageNumber}
-            width={renderWidth}
+            width={width}
+            scale={scale}
             className="shadow-md bg-white"
             loading=""
             renderTextLayer={false}
@@ -69,7 +70,8 @@ const SinglePageView = memo(({ pageNumber, width, scale }: { pageNumber: number;
       <div className="relative select-none" style={{ width: renderWidth }}>
         <Page
           pageNumber={pageNumber}
-          width={renderWidth}
+          width={width}
+          scale={scale}
           className="shadow-md bg-white"
           loading={<div style={{ width: renderWidth, height: renderWidth * 1.4 }} className="flex items-center justify-center bg-card/50 shadow-md"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>}
           renderTextLayer={false}
