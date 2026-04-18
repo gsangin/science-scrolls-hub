@@ -31,8 +31,13 @@ const AuthorFooter = () => {
         <div className="flex items-start gap-5">
           {author.show_photo && author.photo_url && (
             <img
-              src={author.photo_url}
+              src={author.photo_url.replace("/object/public/", "/render/image/public/") + (author.photo_url.includes("?") ? "&" : "?") + "width=128&height=128&resize=cover&quality=75"}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = author.photo_url!; }}
               alt={author.name}
+              width={64}
+              height={64}
+              loading="lazy"
+              decoding="async"
               className="w-16 h-16 rounded-full object-cover shrink-0 border-2 border-border"
             />
           )}
