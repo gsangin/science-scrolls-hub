@@ -12,14 +12,16 @@ const AuthorFooter = () => {
   const { data: author } = useQuery<AuthorSettings | null>({
     queryKey: ["author_settings"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("author_settings")
         .select("name, description, photo_url, show_photo")
         .limit(1)
-        .single();
+        .maybeSingle();
+      if (error) throw error;
       return (data as AuthorSettings) ?? null;
     },
     staleTime: 10 * 60 * 1000, // author data rarely changes
+    retry: 1,
   });
 
   if (!author) return null;
