@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { z } from "zod";
 import { MessageSquare, Send, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+const commentSchema = z.object({
+  message: z.string().trim().min(1, "Message cannot be empty").max(2000, "Message must be under 2000 characters"),
+  author_name: z.string().trim().max(100, "Name must be under 100 characters"),
+});
 
 interface CommentsSectionProps {
   subject: string;
@@ -41,11 +47,18 @@ const CommentsSection = ({ subject, classLevel, subjectName, className: classLab
 
   const addMutation = useMutation({
     mutationFn: async () => {
+      const parsed = commentSchema.safeParse({
+        message,
+        author_name: name.trim() || "Anonymous",
+      });
+      if (!parsed.success) {
+        throw new Error(parsed.error.issues[0]?.message || "Invalid input");
+      }
       const { error } = await supabase.from("comments").insert({
         subject,
         class_level: classLevel,
-        message,
-        author_name: name.trim() || "Anonymous",
+        message: parsed.data.message,
+        author_name: parsed.data.author_name,
       });
       if (error) throw error;
     },
@@ -94,12 +107,14 @@ const CommentsSection = ({ subject, classLevel, subjectName, className: classLab
               placeholder="Your name (optional)"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              maxLength={100}
               className="text-sm"
             />
             <Textarea
               placeholder="Write your request or comment..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              maxLength={2000}
               className="text-sm min-h-[60px]"
             />
             <Button
