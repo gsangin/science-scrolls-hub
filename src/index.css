@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=DM+Sans:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -77,16 +75,58 @@
 }
 
 @layer base {
-  * {
+  *,
+  ::before,
+  ::after {
     @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Smooth scrolling only when user hasn't asked to reduce motion */
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    /* Faster text rendering — avoids sub-pixel antialiasing overhead */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+    /* Prevent layout shift from scrollbar appearing */
+    overflow-y: scroll;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+  }
+
+  /* Images don't shift layout while loading */
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@layer utilities {
+  /* content-visibility: auto tells the browser it can skip rendering
+     off-screen sections — major perf win for long pages */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 400px;
   }
 }

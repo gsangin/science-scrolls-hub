@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Upload, BookOpen, Search, GraduationCap, LogOut, Settings, Loader2, MessageSquare } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -58,15 +58,16 @@ const Index = () => {
     });
   }, [resources, selectedSubject, selectedClass, search]);
 
-  const handleSubjectClick = (subjectId: string) => {
-    if (selectedSubject === subjectId) {
-      setSelectedSubject(null);
+  const handleSubjectClick = useCallback((subjectId: string) => {
+    setSelectedSubject(prev => {
+      if (prev === subjectId) {
+        setSelectedClass(null);
+        return null;
+      }
       setSelectedClass(null);
-    } else {
-      setSelectedSubject(subjectId);
-      setSelectedClass(null);
-    }
-  };
+      return subjectId;
+    });
+  }, []);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -86,21 +87,17 @@ const Index = () => {
     }
   });
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     deleteMutation.mutate(id);
-  };
+  }, [deleteMutation]);
 
-  const handleUpdate = () => {
+  const handleUpdate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['resources'] });
-  };
+  }, [queryClient]);
 
   return (
     <div className="min-h-screen">
-      <header className="relative overflow-hidden bg-primary px-4 sm:px-6 py-10 sm:py-16 text-primary-foreground">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-accent/40" />
-          <div className="absolute -bottom-10 -left-10 h-60 w-60 rounded-full bg-accent/20" />
-        </div>
+      <header className="relative bg-primary px-4 sm:px-6 py-10 sm:py-16 text-primary-foreground">
         {user && (
           <div className="absolute top-4 sm:top-6 left-4 sm:left-6 right-4 sm:right-6 flex items-center justify-between">
             <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={() => navigate("/admin-settings")}>
@@ -136,7 +133,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10">
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10 cv-auto">
         {/* Subject Grid */}
         <section>
           <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground mb-4 sm:mb-5">Subjects</h2>
@@ -163,7 +160,7 @@ const Index = () => {
                 <button
                   key={opt.value}
                   onClick={() => setSelectedClass(prev => prev === opt.value ? null : opt.value)}
-                  className={`rounded-xl border p-4 sm:p-5 text-center font-heading font-semibold text-sm sm:text-base transition-all duration-200 hover:shadow-md ${
+                  className={`rounded-xl border p-4 sm:p-5 text-center font-heading font-semibold text-sm sm:text-base transition-shadow duration-200 hover:shadow-md ${
                     selectedClass === opt.value
                       ? "border-primary bg-primary/5 shadow-sm text-primary"
                       : "border-border bg-card text-card-foreground hover:border-primary/30"

@@ -1,10 +1,10 @@
-import React from "react";
+import type { ElementType } from "react";
 import { Atom, FlaskConical, Dna, Calculator } from "lucide-react";
 
 export interface Subject {
   id: string;
   name: string;
-  icon: React.ElementType;
+  icon: ElementType;
   color: string;
   resourceCount: number;
 }
