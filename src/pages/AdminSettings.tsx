@@ -28,11 +28,12 @@ const AdminSettings = () => {
   const { data: settings } = useQuery<AuthorSettingsData | null>({
     queryKey: ["author_settings"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("author_settings")
         .select("*")
         .limit(1)
-        .single();
+        .maybeSingle();
+      if (error) throw error;
       return (data as AuthorSettingsData) ?? null;
     },
     enabled: !!user,
@@ -77,19 +78,20 @@ const AdminSettings = () => {
   };
 
   const handleSave = async () => {
-    if (!settingsId) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("author_settings")
-        .update({
-          name: resolvedName,
-          description: resolvedDesc,
-          photo_url: photoUrl,
-          show_photo: showPhoto,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", settingsId);
+      const payload = {
+        name: resolvedName,
+        description: resolvedDesc,
+        photo_url: photoUrl,
+        show_photo: showPhoto,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = settingsId
+        ? await supabase.from("author_settings").update(payload).eq("id", settingsId)
+        : await supabase.from("author_settings").insert(payload);
+
       if (error) throw error;
       // Invalidate so AuthorFooter picks up the change
       queryClient.invalidateQueries({ queryKey: ["author_settings"] });
