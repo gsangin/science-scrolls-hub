@@ -193,22 +193,31 @@ const PdfViewer = () => {
     setLoading(false);
   }, []);
 
-  // Fetch the PDF blob using the public URL
+  // Fetch the PDF blob using the secure Edge Function
   useEffect(() => {
     if (!filePath) return;
     const abortCtrl = new AbortController();
 
     (async () => {
       try {
-        const { data } = supabase.storage.from("study-materials").getPublicUrl(filePath);
+        const { data: { session } } = await supabase.auth.getSession();
         
-        // Fetch the PDF blob using the public URL to pass to react-pdf
-        const res = await fetch(data.publicUrl, {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/serve-pdf?file_path=${encodeURIComponent(filePath)}`;
+        
+        const headers: HeadersInit = {
+          Accept: "application/pdf, application/octet-stream",
+        };
+        
+        if (session?.access_token) {
+          headers.Authorization = `Bearer ${session.access_token}`;
+        }
+        
+        const res = await fetch(url, {
           signal: abortCtrl.signal,
-          headers: { Accept: "application/pdf, application/octet-stream" },
+          headers,
         });
         
-        if (!res.ok) throw new Error("Failed to fetch PDF");
+        if (!res.ok) throw new Error("Failed to fetch PDF via Edge Function");
         const blob = await res.blob();
         setPdfData(blob);
       } catch (err: any) {
