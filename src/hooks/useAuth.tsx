@@ -13,12 +13,26 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/** Read admin role directly from the JWT app_metadata claim.
- *  No DB roundtrip needed — the custom_access_token_hook injects it. */
+/** Read admin role from the JWT app_metadata claim if present. */
 const isAdminFromSession = (session: Session | null): boolean => {
   if (!session?.user) return false;
   const role = session.user.app_metadata?.app_role;
   return role === "admin";
+};
+
+/** Fallback: query user_roles table directly. */
+const fetchIsAdmin = async (userId: string): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  if (error) {
+    console.warn("[useAuth] role lookup failed", error.message);
+    return false;
+  }
+  return !!data;
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -28,11 +42,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    const resolveAdmin = (session: Session | null) => {
+      if (!session?.user) {
+        setIsAdmin(false);
+        return;
+      }
+      // Try JWT claim first (no roundtrip)
+      if (isAdminFromSession(session)) {
+        setIsAdmin(true);
+        return;
+      }
+      // Fallback to DB lookup (defer to avoid deadlock with auth callback)
+      setTimeout(() => {
+        fetchIsAdmin(session.user.id).then(setIsAdmin);
+      }, 0);
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setIsAdmin(isAdminFromSession(session));
+        resolveAdmin(session);
         setLoading(false);
       }
     );
@@ -40,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setIsAdmin(isAdminFromSession(session));
+      resolveAdmin(session);
       setLoading(false);
     });
 
