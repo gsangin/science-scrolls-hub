@@ -21,7 +21,7 @@ const jsonError = (status: number, message: string) =>
 
 // Strict allow-list: bucket layout is "<class>/<subject>/<uuid>.<ext>" (or similar).
 // Allow only safe characters; explicitly reject ".." or "//" anywhere.
-const SAFE_PATH = /^[A-Za-z0-9_\-./]{1,512}$/;
+const SAFE_PATH = /^[A-Za-z0-9_\-./ ()]{1,512}$/;
 const isSafePath = (p: string): boolean => {
   if (!p || typeof p !== "string") return false;
   if (!SAFE_PATH.test(p)) return false;
